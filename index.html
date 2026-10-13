@@ -64,6 +64,8 @@
     .top-status { display: flex; align-items: center; gap: 18px; }
     .sound-toggle { min-height: 28px; padding: 4px 8px; border: 1px solid rgba(214,218,203,.24); background: transparent; color: #c7c9bd; cursor: pointer; font: 10px "Courier New",monospace; letter-spacing: .08em; text-transform: uppercase; }
     .sound-toggle:hover, .sound-toggle:focus-visible { border-color: var(--gold); outline: none; color: #fff4d9; }
+    .rain-control { display:flex; align-items:center; gap:6px; white-space:nowrap; }
+    .rain-control input { width:60px; accent-color:#a4aa8a; cursor:pointer; }
     .lamp { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #a4aa8a; box-shadow: 0 0 9px #a4aa8a; }
     .frame {
       position: relative;
@@ -315,6 +317,25 @@
     .form-entry .new-word { display:inline-block; margin-left:6px; color:#34483b; font-style:italic; animation:ink-in .6s ease both; }
     .form-entry .copied { color:#34483b; letter-spacing:.03em; }
     .form-entry .signature { float:right; color:#42574a; font:italic 20px "Segoe Script","Brush Script MT",cursive; transform:rotate(-5deg); }
+    .address-line { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; }
+    .address-line input { width:min(230px,100%); min-height:30px; border:0; border-bottom:1px solid #7f897b; outline:0; background:transparent; color:#34483b; font:italic 18px Georgia,serif; }
+    .address-line input:focus { border-bottom-color:#405d47; box-shadow:0 2px 0 rgba(64,93,71,.18); }
+    .address-line input:disabled { border:0; color:#9a998a; }
+    .address-line span { color:#556258; font:12px "Courier New",monospace; }
+    .signature-panel { max-width:310px; border-bottom:1px solid rgba(130,122,104,.45); }
+    .signature-panel[hidden], .address-controls[hidden], .docket[hidden] { display:none; }
+    .signature-panel canvas { display:block; width:100%; height:62px; cursor:crosshair; touch-action:none; }
+    .signature-tools { display:flex; gap:10px; margin-top:4px; }
+    .signature-tools button, .address-controls button { padding:3px 7px; border:1px solid #a9a795; background:transparent; color:#495449; cursor:pointer; font:10px "Courier New",monospace; }
+    .signature-tools button:hover, .address-controls button:hover { background:#dfd8c7; }
+    .address-controls { margin:6px 0; }
+    .form-actions button:disabled { opacity:.5; cursor:default; }
+    .docket { margin:14px 0 0; padding:9px 12px; border:1px solid #c7bda9; background:#e2dac9; color:#4b564b; font:10px/1.5 "Courier New",monospace; letter-spacing:.035em; }
+    .docket summary { cursor:pointer; text-transform:uppercase; letter-spacing:.1em; }
+    .docket ol { margin:8px 0 2px; padding:0; list-style:none; display:grid; gap:3px; }
+    .docket li:before { content:"□"; display:inline-block; width:17px; color:#8b6357; }
+    .docket li.done:before { content:"✓"; color:#475e4d; }
+    .docket li.done { color:#73796e; }
     .form-entry .annex { display:inline-flex; align-items:center; gap:8px; padding:5px 9px; border:1px solid #b7ad99; background:#e4dcc9; color:#455347; font:10px "Courier New",monospace; letter-spacing:.08em; text-transform:uppercase; animation:attach-in .45s ease both; }
     .annex-pin { width:8px; height:8px; border:1px solid #7d493e; border-radius:50%; background:#a75e50; box-shadow:inset 0 0 0 2px #ddcbbb; }
     .form-stamp { position:absolute; right:19px; bottom:14px; padding:4px 8px; color:#89564a; border:2px solid rgba(152,93,80,.62); font:bold 11px "Courier New",monospace; letter-spacing:.14em; transform:rotate(-8deg) scale(.6); opacity:0; }
@@ -446,7 +467,7 @@
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span class="seal" aria-hidden="true">R</span><span>Civil Records Office&nbsp; / &nbsp;Section IV</span></div>
-      <div class="top-status"><span><i class="lamp"></i>Office open</span><span class="loop-text" id="loop-label">First morning</span><button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Mute sound">Sound on</button></div>
+      <div class="top-status"><span><i class="lamp"></i>Office open</span><span class="loop-text" id="loop-label">First morning</span><label class="rain-control">Rain <input id="rain-volume" type="range" min="0" max="100" value="70" aria-label="Rain volume"></label><button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Mute sound">Sound on</button></div>
     </header>
 
     <main class="frame" aria-label="See You Tomorrow, Mr. Klein interactive story">
@@ -464,6 +485,7 @@
           <div class="dept">Civil Status &amp; Household Register<br>Desk 14 · Mr. Klein</div>
           <div class="workday" id="workday">Before opening</div>
         </div>
+        <details class="docket" id="docket" hidden><summary id="docket-title">Today’s docket</summary><ol id="docket-list"></ol></details>
         <div class="page-content" id="page-content" aria-live="polite">
           <section class="stage active" id="stage-welcome">
             <p class="eyebrow">A short interactive narrative</p>
@@ -489,7 +511,7 @@
             <h2 id="case-title">A name returned to the register</h2>
             <p class="lead" id="case-description"></p>
             <div class="paper-slip">
-              <div class="case-ref"><span>Request 18 / 4</span><span id="case-status">Pending</span></div>
+              <div class="case-ref"><span>Request 18 / 4 · Dlouhá 18, 110 00 Praha 1</span><span id="case-status">Pending</span></div>
               <div class="paper-label">Applicant’s statement</div>
               <p id="applicant-statement" style="margin-bottom:0;color:#3d493f">“My husband is not dead. The register says he is. I need his name on the household record.”</p>
               <p class="applicant-voice" id="applicant-followup">She keeps one hand on the envelope. The other rests on the chair beside her.</p>
@@ -517,11 +539,16 @@
               <div class="form-heading"><span>Household register · 18/4</span><span id="form-copy-label">Clerk’s copy</span></div>
               <div class="form-field">Recorded status</div>
               <div class="form-entry" id="form-status">Emil Voss — deceased</div>
+              <div class="form-field">Household address · street and number</div>
+              <div class="form-entry address-line"><input id="address-input" type="text" autocomplete="off" spellcheck="false" placeholder="Copy from the request" aria-label="Household street and number" disabled><span>110 00 Praha 1</span></div>
               <div class="form-field">Clerk’s signature</div>
               <div class="form-entry" id="form-signature">____________________________</div>
+              <div class="signature-panel" id="signature-panel" hidden><canvas id="signature-canvas" width="620" height="124" aria-label="Draw Mr. Klein’s signature with a mouse or finger"></canvas></div>
               <div class="form-stamp" id="form-stamp">RECEIVED</div>
             </div>
             <div class="action-progress" id="action-progress"></div>
+            <div class="address-controls" id="address-controls" hidden><button type="button" data-step="copy-address">Copy Dlouhá 18 from the request</button></div>
+            <div class="signature-tools" id="signature-tools" hidden><button type="button" data-step="clear-signature">Clear signature</button><button type="button" data-step="type-signature">Use typed signature</button></div>
             <div class="form-actions" id="form-actions"></div>
             <p class="action-feedback" id="action-feedback" role="status" aria-live="polite"></p>
             <p class="action-hint">Before you sign and send it on, you can still set the form aside.</p>
@@ -564,15 +591,17 @@
     (function () {
       "use strict";
       var stageNames = ["welcome", "morning", "case", "action", "outcome", "final"];
-      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", markSeen: false, transitioning: false };
+      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, markSeen: false, transitioning: false };
       var audioEngine = null;
       var soundEnabled = true;
       var musicPulse = 0;
+      var rainVolume = .7;
+      var lastPenSound = 0;
       var labels = { correct: "CORRECTION ENTERED", uphold: "NO AMENDMENT", both: "ANNEX ATTACHED" };
       var docs = {
         registry: { title: "Registry extract · Form 12", day1: "Emil Voss — deceased. Entry accepted fourteen years ago. The field for household members is blank." },
-        receipt: { title: "Rent receipt · last month", day1: "Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. The archive has no matching sample." },
-        statement: { title: "Neighbor statement · Building 18", day1: "“No one called Emil has ever lived at number 18. I have been here since before the new records began.” — A. Novak" }
+        receipt: { title: "Rent receipt · last month", day1: "Dlouhá 18, 110 00 Praha 1. Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. The archive has no matching sample." },
+        statement: { title: "Neighbor statement · Dlouhá 18", day1: "“No one called Emil has ever lived at number 18. I have been here since before the new records began.” — A. Novak" }
       };
       var returns = {
         correct: {
@@ -591,8 +620,8 @@
           memo: "Applicant kept a second chair available. Seat count is not a register field.",
           docs: {
             registry: { title: "Registry extract · returned copy", html: 'Emil Voss — <span class="crossed">deceased</span> <span class="inked">resides at this address</span>. The archive index retains the earlier status. Both lines carry your initials.' },
-            receipt: { title: "Rent receipt · last month", html: "Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
-            statement: { title: "Neighbor statement · Building 18", html: "“The Voss household has always been two people.” — A. Novak. His signed statement from yesterday remains attached." }
+            receipt: { title: "Rent receipt · last month", html: "Dlouhá 18, 110 00 Praha 1. Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
+            statement: { title: "Neighbor statement · Dlouhá 18", html: "“The Voss household has always been two people.” — A. Novak. His signed statement from yesterday remains attached." }
           }
         },
         uphold: {
@@ -606,13 +635,13 @@
           statement: "“If he cannot receive a letter here, they will take his name off the lease.”",
           followup: "She holds the unopened envelope by its corners. It has no return address.",
           status: "Returned · undeliverable",
-          returnHtml: "To: Emil Voss<br>18, Building 4",
+          returnHtml: "To: Emil Voss<br>Dlouhá 18, 110 00 Praha 1",
           returnMark: "Returned by post · addressee deceased",
           memo: "Applicant kept a second chair available. No additional resident is recorded.",
           docs: {
             registry: { title: "Registry extract · refusal copy", html: "Emil Voss — deceased. No amendment entered. The applicant signature field bears Marta’s name; the carbon sheet beneath it has no impression." },
-            receipt: { title: "Rent receipt · last month", html: "Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
-            statement: { title: "Neighbor statement · Building 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. The housing office has requested a copy." }
+            receipt: { title: "Rent receipt · last month", html: "Dlouhá 18, 110 00 Praha 1. Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
+            statement: { title: "Neighbor statement · Dlouhá 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. The housing office has requested a copy." }
           }
         },
         both: {
@@ -631,8 +660,8 @@
           memo: "Applicant kept a second chair available. Accounts retained together; seat count omitted.",
           docs: {
             registry: { title: "Registry extract · sheet 1 of 2", html: 'Emil Voss — deceased. <span class="original-mark">Original</span> The attached receipt has the same file number.' },
-            receipt: { title: "Rent receipt · sheet 2 of 2", html: 'Paid in full by M. Voss and E. Voss. <span class="original-mark">Original</span> The staple crosses both seals.' },
-            statement: { title: "Neighbor statement · Building 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. Statement filed separately from the bound originals." }
+            receipt: { title: "Rent receipt · sheet 2 of 2", html: 'Dlouhá 18, 110 00 Praha 1. Paid in full by M. Voss and E. Voss. <span class="original-mark">Original</span> The staple crosses both seals.' },
+            statement: { title: "Neighbor statement · Dlouhá 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. Statement filed separately from the bound originals." }
           }
         }
       };
@@ -651,6 +680,25 @@
         document.querySelector(".page-content").scrollTop = 0;
         setSoundMood(name);
         updateStatus();
+        renderDocket();
+      }
+      function renderDocket() {
+        var docket = el("docket");
+        docket.hidden = state.stage === "welcome" || state.stage === "final";
+        if (docket.hidden) return;
+        var tasks = state.day === 1
+          ? [
+            ["Compare the registry and rent receipt", !!(state.viewed.registry && state.viewed.receipt)],
+            ["Enter the household address on the copy", !!state.address.trim() || !!state.signedDays[1]],
+            ["Sign and send the clerk’s copy", !!state.signedDays[1]]
+          ]
+          : [
+            ["Read the returned copy", state.returnedRead],
+            ["Enter the address on the second copy", !!state.address.trim() || !!state.signedDays[2]],
+            ["Sign and route the second copy", !!state.signedDays[2]]
+          ];
+        el("docket-title").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Today’s docket · " + tasks.filter(function (task) { return task[1]; }).length + "/3";
+        el("docket-list").innerHTML = tasks.map(function (task) { return '<li class="' + (task[1] ? "done" : "") + '">' + esc(task[0]) + "</li>"; }).join("");
       }
       function updateStatus() {
         var dayName = state.day === 1 ? "Monday" : "Tuesday";
@@ -707,8 +755,11 @@
         el("case-status").textContent = first ? "Pending" : returned.status;
         state.viewed = {};
         state.activeDoc = "registry";
+        state.address = "";
+        state.returnedRead = false;
         renderEvidence();
         setStage("morning");
+        el("docket").open = true;
       }
       function renderEvidence() {
         var doc = state.day === 1 ? docs[state.activeDoc] : returns[state.firstChoice].docs[state.activeDoc];
@@ -722,6 +773,7 @@
         el("evidence-view").innerHTML = '<div class="evidence-index">' + esc(doc.title) + '</div><p>' + content + '</p>';
         var count = Object.keys(state.viewed).length;
         el("evidence-count").textContent = count ? "· " + count + " of 3 opened" : "";
+        renderDocket();
       }
       function outcomeFor(choice, day) {
         if (day === 1) {
@@ -751,7 +803,7 @@
         if (choice === "correct") {
           return {
             title: "The second copy is issued.",
-            copy: "Marta says the envelope has already been delivered. She takes the copy anyway. The address line is blank.",
+            copy: "Marta says the envelope has already been delivered. She takes the copy anyway. The address remains exactly as you entered it.",
             residue: "The office prints a fresh household record with two names. The archive count remains one.",
             stamp: "CORRECTED AGAIN"
           };
@@ -811,7 +863,7 @@
           var rainSource = ctx.createBufferSource();
           var rainFilter = ctx.createBiquadFilter();
           rainSource.buffer = noise; rainSource.loop = true;
-          rainFilter.type = "lowpass"; rainFilter.frequency.value = 950;
+          rainFilter.type = "lowpass"; rainFilter.frequency.value = 1900;
           rainSource.connect(rainFilter); rainFilter.connect(rain); rainSource.start();
           audioEngine = { ctx: ctx, master: master, music: music, effects: effects, rain: rain };
           setSoundMood(state.stage);
@@ -825,7 +877,7 @@
         var ctx = audioEngine.ctx;
         var level = { welcome: 0, morning: .32, case: .4, action: .22, outcome: .27, final: .25, transition: .47 }[stage] || 0;
         audioEngine.music.gain.setTargetAtTime(level, ctx.currentTime, .45);
-        audioEngine.rain.gain.setTargetAtTime(stage === "welcome" ? 0 : .028, ctx.currentTime, .5);
+        audioEngine.rain.gain.setTargetAtTime(stage === "welcome" ? 0 : .15 * rainVolume, ctx.currentTime, .5);
       }
       function playMusicNote() {
         if (!audioEngine || !soundEnabled || state.stage === "welcome" || document.hidden) return;
@@ -879,6 +931,28 @@
         playActionSound(kind);
         if (navigator.vibrate) navigator.vibrate(kind === "stamp" ? [22, 18, 34] : kind === "scratch" ? [12, 12, 12] : 10);
       }
+      function penTick() {
+        var now = performance.now();
+        if (now - lastPenSound > 92) { playActionSound("write"); lastPenSound = now; }
+      }
+      function syncFormReadiness() {
+        var address = state.address.trim();
+        var signed = state.signatureDrawn || state.signatureTyped;
+        var button = el("form-actions").querySelector('[data-step="sign"]');
+        if (button) button.disabled = !address || !signed;
+        el("action-feedback").textContent = !address ? "Copy the street and number from the request." : !signed ? "Sign on the line with a finger or mouse, or use the typed signature." : "The copy is ready for the outgoing tray.";
+        renderDocket();
+      }
+      function clearSignature() {
+        var canvas = el("signature-canvas");
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+        state.signatureDrawn = false;
+        state.signatureTyped = false;
+        el("form-signature").innerHTML = "____________________________";
+        el("form-signature").hidden = true;
+        el("signature-panel").hidden = false;
+        syncFormReadiness();
+      }
       function renderAction() {
         var choice = state.pendingChoice;
         var status = el("form-status");
@@ -887,6 +961,12 @@
         stamp.textContent = "RECEIVED";
         stamp.classList.remove("visible");
         signature.innerHTML = "____________________________";
+        signature.hidden = false;
+        el("signature-panel").hidden = true;
+        el("signature-tools").hidden = true;
+        el("address-controls").hidden = true;
+        el("address-input").disabled = true;
+        el("address-input").value = state.address;
         el("working-form").classList.remove("is-working", "scratched", "sent");
         el("form-copy-label").textContent = state.day === 1 ? "Clerk’s copy" : "Second copy";
         el("action-eyebrow").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Clerk’s copy";
@@ -932,11 +1012,24 @@
             el("form-actions").innerHTML = '<button class="primary form-action" data-step="sign">Sign and send this copy</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
           }
         }
+        var addressReady = state.actionStep >= (choice === "correct" ? 2 : 1);
+        if (addressReady) {
+          el("action-progress").textContent = (choice === "correct" ? "3" : "2") + " · Copy the address and sign the form";
+          el("address-controls").hidden = false;
+          el("signature-tools").hidden = false;
+          el("address-input").disabled = false;
+          signature.hidden = true;
+          el("signature-panel").hidden = false;
+          clearSignature();
+        }
       }
       function startAction(choice) {
         state.pendingChoice = choice;
         state.actionStep = 0;
         state.actionFeedback = "";
+        state.address = "";
+        state.signatureDrawn = false;
+        state.signatureTyped = false;
         renderAction();
         setStage("action");
       }
@@ -945,9 +1038,31 @@
         var feedback = el("action-feedback");
         if (step === "cancel") {
           state.pendingChoice = null;
+          state.address = "";
+          state.signatureDrawn = false;
+          state.signatureTyped = false;
           setStage("case");
           return;
         }
+        if (step === "copy-address") {
+          state.address = "Dlouhá 18";
+          el("address-input").value = state.address;
+          feelAction("write");
+          syncFormReadiness();
+          return;
+        }
+        if (step === "clear-signature") { clearSignature(); return; }
+        if (step === "type-signature") {
+          state.signatureDrawn = false;
+          state.signatureTyped = true;
+          el("signature-panel").hidden = true;
+          el("form-signature").hidden = false;
+          el("form-signature").innerHTML = '<span class="signature">M. Klein</span>';
+          feelAction("write");
+          syncFormReadiness();
+          return;
+        }
+        if (step === "sign" && (!state.address.trim() || !(state.signatureDrawn || state.signatureTyped))) return;
         document.querySelectorAll(".form-action").forEach(function (button) { button.disabled = true; });
         form.classList.add("is-working");
         if (step === "erase") {
@@ -972,13 +1087,17 @@
         }
         if (step === "sign") {
           document.querySelectorAll(".form-action").forEach(function (button) { button.disabled = true; });
-          el("form-signature").innerHTML = '<span class="signature">M. Klein</span>';
+          el("address-input").disabled = true;
+          el("signature-tools").hidden = true;
+          el("address-controls").hidden = true;
           el("form-stamp").textContent = "SENT ONWARD";
           el("form-stamp").classList.add("visible");
           feedback.textContent = "The stamp comes down. A copy slips into the outgoing tray.";
           feelAction("stamp");
           state.currentChoice = state.pendingChoice;
           if (state.day === 1) state.firstChoice = state.currentChoice;
+          state.signedDays[state.day] = true;
+          renderDocket();
           window.setTimeout(function () { form.classList.add("sent"); playActionSound("slide"); }, 260);
           window.setTimeout(function () { finishChoice(state.pendingChoice); }, 820);
         }
@@ -1047,7 +1166,7 @@
         }, reduced ? 420 : 780);
       }
       function reset() {
-        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", markSeen: false, transitioning: false };
+        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, markSeen: false, transitioning: false };
         el("paper-transition").hidden = true;
         el("tooltip").hidden = true;
         el("room-note").textContent = "The room is quiet except for the clock and the paper feed in the next office.";
@@ -1061,7 +1180,7 @@
         if (action) {
           var name = action.getAttribute("data-action");
           if (name === "begin") { showMorning(); ensureAudio(); }
-          if (name === "open-file") setStage("case");
+          if (name === "open-file") { if (state.day === 2) state.returnedRead = true; setStage("case"); }
           if (name === "next") closeDay();
           if (name === "restart") reset();
           return;
@@ -1079,6 +1198,60 @@
           performAction(formAction.getAttribute("data-step"));
           return;
         }
+      });
+      el("address-input").addEventListener("input", function () {
+        state.address = this.value;
+        penTick();
+        syncFormReadiness();
+      });
+      var signatureCanvas = el("signature-canvas");
+      var signatureContext = signatureCanvas.getContext("2d");
+      var signing = false;
+      var strokeLength = 0;
+      function signaturePoint(event) {
+        var rect = signatureCanvas.getBoundingClientRect();
+        return { x: (event.clientX - rect.left) * signatureCanvas.width / rect.width, y: (event.clientY - rect.top) * signatureCanvas.height / rect.height };
+      }
+      signatureCanvas.addEventListener("pointerdown", function (event) {
+        if (state.stage !== "action") return;
+        signing = true;
+        strokeLength = 0;
+        signatureCanvas.setPointerCapture(event.pointerId);
+        var point = signaturePoint(event);
+        signatureContext.beginPath();
+        signatureContext.moveTo(point.x, point.y);
+        signatureContext.lineWidth = 2.8;
+        signatureContext.lineCap = "round";
+        signatureContext.lineJoin = "round";
+        signatureContext.strokeStyle = "#354f3c";
+        feelAction("write");
+      });
+      signatureCanvas.addEventListener("pointermove", function (event) {
+        if (!signing) return;
+        var point = signaturePoint(event);
+        var last = signatureContext._lastPoint || point;
+        strokeLength += Math.hypot(point.x - last.x, point.y - last.y);
+        signatureContext.lineTo(point.x, point.y);
+        signatureContext.stroke();
+        signatureContext._lastPoint = point;
+        penTick();
+      });
+      function endSignature() {
+        if (!signing) return;
+        signing = false;
+        signatureContext._lastPoint = null;
+        if (strokeLength > 12) {
+          state.signatureDrawn = true;
+          state.signatureTyped = false;
+          if (navigator.vibrate) navigator.vibrate(9);
+          syncFormReadiness();
+        }
+      }
+      signatureCanvas.addEventListener("pointerup", endSignature);
+      signatureCanvas.addEventListener("pointercancel", endSignature);
+      el("rain-volume").addEventListener("input", function () {
+        rainVolume = Number(this.value) / 100;
+        if (audioEngine) setSoundMood(state.stage);
       });
       el("yellow-mark").addEventListener("click", function () {
         state.markSeen = true;
