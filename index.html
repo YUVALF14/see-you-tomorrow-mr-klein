@@ -295,6 +295,37 @@
     }
     .outcome-copy { max-width: 515px; padding: 16px 19px; border-left: 2px solid var(--gold); background: rgba(255,255,255,.25); }
     .outcome-copy p:last-child { margin-bottom: 0; }
+    .action-intro { max-width: 540px; color: #596057; }
+    .working-form {
+      position: relative; max-width: 540px; min-height: 225px; margin: 20px 0 14px; padding: 19px 22px 21px; overflow: hidden;
+      border: 1px solid #bdb4a2;
+      background: repeating-linear-gradient(0deg, transparent 0 29px, rgba(110,103,87,.12) 30px, transparent 31px), #eee7d6;
+      box-shadow: 0 12px 24px rgba(47,43,34,.13), 3px 4px 0 rgba(73,72,61,.07);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .working-form.is-working { transform: rotate(-.35deg) translateY(1px); box-shadow: 0 5px 10px rgba(47,43,34,.15); }
+    .working-form:after { position:absolute; top:-1px; right:-1px; width:0; height:0; content:""; border-top:20px solid #d6cdb9; border-left:20px solid transparent; }
+    .form-heading { display:flex; justify-content:space-between; gap:12px; padding-bottom:9px; margin-bottom:16px; border-bottom:1px solid #cfc5b1; color:#657065; font:10px "Courier New",monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .form-field { margin:10px 0; color:#697064; font:9px "Courier New",monospace; letter-spacing:.12em; text-transform:uppercase; }
+    .form-entry { min-height:29px; padding:3px 2px 5px; border-bottom:1px solid rgba(130,122,104,.32); color:#354138; font:17px/1.35 Georgia,"Times New Roman",serif; }
+    .form-entry .old-word { color:#985d50; text-decoration:line-through; text-decoration-thickness:2px; }
+    .form-entry .new-word { display:inline-block; margin-left:6px; color:#34483b; font-style:italic; animation:ink-in .6s ease both; }
+    .form-entry .copied { color:#34483b; letter-spacing:.03em; }
+    .form-entry .signature { float:right; color:#42574a; font:italic 20px "Segoe Script","Brush Script MT",cursive; transform:rotate(-5deg); }
+    .form-entry .annex { display:inline-flex; align-items:center; gap:8px; padding:5px 9px; border:1px solid #b7ad99; background:#e4dcc9; color:#455347; font:10px "Courier New",monospace; letter-spacing:.08em; text-transform:uppercase; animation:attach-in .45s ease both; }
+    .annex-pin { width:8px; height:8px; border:1px solid #7d493e; border-radius:50%; background:#a75e50; box-shadow:inset 0 0 0 2px #ddcbbb; }
+    .form-stamp { position:absolute; right:19px; bottom:14px; padding:4px 8px; color:#89564a; border:2px solid rgba(152,93,80,.62); font:bold 11px "Courier New",monospace; letter-spacing:.14em; transform:rotate(-8deg) scale(.6); opacity:0; }
+    .form-stamp.visible { animation:stamp-in .25s cubic-bezier(.15,.8,.25,1.5) forwards; }
+    .form-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .form-actions .primary { margin-top:0; }
+    .action-feedback { min-height:22px; margin:8px 0 0; color:#77796f; font:10px/1.5 "Courier New",monospace; letter-spacing:.04em; }
+    .action-hint { margin:11px 0 0; color:#77796f; font-size:12px; font-style:italic; }
+    .action-progress { margin:0 0 6px; color:var(--red); font:10px "Courier New",monospace; letter-spacing:.13em; text-transform:uppercase; }
+    @keyframes ink-in { from { opacity:0; clip-path:inset(0 100% 0 0); } to { opacity:1; clip-path:inset(0 0 0 0); } }
+    @keyframes attach-in { from { opacity:0; transform:translateY(-13px) rotate(-3deg); } to { opacity:1; transform:translateY(0) rotate(0); } }
+    @keyframes stamp-in { to { opacity:.86; transform:rotate(-8deg) scale(1); } }
+    @keyframes scrape { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-2px); } 55% { transform:translateX(2px); } 75% { transform:translateX(-1px); } }
+    .working-form.scratched { animation:scrape .2s linear 3; }
     .file-total { display: flex; align-items: center; gap: 10px; margin: 22px 0 8px; color: var(--muted); font: 10px "Courier New", monospace; letter-spacing: .09em; text-transform: uppercase; }
     .file-total:after { width: 34px; height: 1px; content: ""; background: var(--line); }
     .final-card { max-width: 520px; margin: 19px 0; padding: 19px 21px; background: #dcd4c3; border: 1px solid #c4baa7; box-shadow: 3px 4px 0 rgba(73,72,61,.1); }
@@ -436,6 +467,24 @@
             </div>
           </section>
 
+          <section class="stage" id="stage-action" aria-labelledby="action-title">
+            <p class="eyebrow" id="action-eyebrow">Monday · Clerk’s copy</p>
+            <h2 id="action-title">Put the decision on paper.</h2>
+            <p class="action-intro" id="action-intro"></p>
+            <div class="working-form" id="working-form" aria-live="polite">
+              <div class="form-heading"><span>Household register · 18/4</span><span id="form-copy-label">Clerk’s copy</span></div>
+              <div class="form-field">Recorded status</div>
+              <div class="form-entry" id="form-status">Emil Voss — deceased</div>
+              <div class="form-field">Clerk’s signature</div>
+              <div class="form-entry" id="form-signature">____________________________</div>
+              <div class="form-stamp" id="form-stamp">RECEIVED</div>
+            </div>
+            <div class="action-progress" id="action-progress"></div>
+            <div class="form-actions" id="form-actions"></div>
+            <p class="action-feedback" id="action-feedback" role="status" aria-live="polite"></p>
+            <p class="action-hint">Before you sign and send it on, you can still set the form aside.</p>
+          </section>
+
           <section class="stage" id="stage-outcome">
             <p class="eyebrow" id="outcome-eyebrow">Decision entered</p>
             <h2 id="outcome-title"></h2>
@@ -466,8 +515,8 @@
   <script>
     (function () {
       "use strict";
-      var stageNames = ["welcome", "morning", "case", "outcome", "final"];
-      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, viewed: {}, activeDoc: "registry", markSeen: false };
+      var stageNames = ["welcome", "morning", "case", "action", "outcome", "final"];
+      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", markSeen: false, audio: null };
       var labels = { correct: "CORRECTION ENTERED", uphold: "NO AMENDMENT", both: "ANNEX ATTACHED" };
       var docs = {
         registry: { title: "Registry extract · Form 12", day1: "Emil Voss — deceased. Entry accepted fourteen years ago. The field for household members is blank.", day2: "Emil Voss — deceased. Entry accepted fourteen years ago. A pencil note in the margin reads: “Second copy requested.”" },
@@ -504,7 +553,7 @@
           el("status-right").textContent = "No further instructions";
         } else {
           el("status-left").textContent = "File 18/4 · " + (state.day === 1 ? "First copy" : "Second copy");
-          el("status-right").textContent = state.stage === "case" ? "Disposition required" : "No further instructions";
+          el("status-right").textContent = state.stage === "case" ? "Disposition required" : state.stage === "action" ? "Clerk’s action required" : "No further instructions";
         }
       }
       function showMorning() {
@@ -600,9 +649,150 @@
           stamp: "DUPLICATE ORIGINAL"
         };
       }
+      function playActionSound(kind) {
+        try {
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          if (!state.audio) state.audio = new AudioContext();
+          if (state.audio.state === "suspended") state.audio.resume();
+          var ctx = state.audio;
+          var now = ctx.currentTime;
+          if (kind === "stamp") {
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(125, now);
+            osc.frequency.exponentialRampToValueAtTime(54, now + .075);
+            gain.gain.setValueAtTime(.0001, now);
+            gain.gain.exponentialRampToValueAtTime(.13, now + .008);
+            gain.gain.exponentialRampToValueAtTime(.0001, now + .12);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(now); osc.stop(now + .13);
+          } else {
+            var length = Math.floor(ctx.sampleRate * (kind === "scratch" ? .18 : .095));
+            var buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+            var data = buffer.getChannelData(0);
+            for (var i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length);
+            var source = ctx.createBufferSource();
+            var filter = ctx.createBiquadFilter();
+            var level = ctx.createGain();
+            source.buffer = buffer;
+            filter.type = "lowpass"; filter.frequency.value = kind === "scratch" ? 1650 : 2400;
+            level.gain.value = kind === "scratch" ? .17 : .095;
+            source.connect(filter); filter.connect(level); level.connect(ctx.destination); source.start(now);
+          }
+        } catch (e) { /* Sound is decorative; the interaction remains available without audio. */ }
+      }
+      function feelAction(kind) {
+        playActionSound(kind);
+        if (navigator.vibrate) navigator.vibrate(kind === "stamp" ? [22, 18, 34] : kind === "scratch" ? [12, 12, 12] : 10);
+      }
+      function renderAction() {
+        var choice = state.pendingChoice;
+        var status = el("form-status");
+        var signature = el("form-signature");
+        var stamp = el("form-stamp");
+        stamp.textContent = "RECEIVED";
+        stamp.classList.remove("visible");
+        signature.innerHTML = "____________________________";
+        el("working-form").classList.remove("is-working", "scratched");
+        el("form-copy-label").textContent = state.day === 1 ? "Clerk’s copy" : "Second copy";
+        el("action-eyebrow").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Clerk’s copy";
+        el("action-feedback").textContent = state.actionFeedback || "";
+        if (choice === "correct") {
+          el("action-title").textContent = "Change the recorded status.";
+          el("action-intro").textContent = "The old entry is already in ink. The correction will stay beside it in the archive.";
+          if (state.actionStep === 0) {
+            status.innerHTML = "Emil Voss — deceased";
+            el("action-progress").textContent = "1 · Amend the archived entry";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="erase">Strike through “deceased”</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          } else if (state.actionStep === 1) {
+            status.innerHTML = 'Emil Voss — <span class="old-word">deceased</span>';
+            el("action-progress").textContent = "2 · Write the current status";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="write">Write “resides at this address”</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          } else {
+            status.innerHTML = 'Emil Voss — <span class="old-word">deceased</span><span class="new-word">resides at this address</span>';
+            el("action-progress").textContent = "3 · The correction is ready for your signature";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="sign">Sign and send this copy</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          }
+        } else if (choice === "uphold") {
+          el("action-title").textContent = "Copy the archived status.";
+          el("action-intro").textContent = "A fresh copy is needed. The official entry gives you one word to carry forward.";
+          if (state.actionStep === 0) {
+            status.innerHTML = "____________________________";
+            el("action-progress").textContent = "1 · Transcribe the archive";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="copy">Copy “deceased” to the form</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          } else {
+            status.innerHTML = 'Emil Voss — <span class="copied">deceased</span>';
+            el("action-progress").textContent = "2 · The entry is ready for your signature";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="sign">Sign and send this copy</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          }
+        } else {
+          el("action-title").textContent = "Keep both accounts in the file.";
+          el("action-intro").textContent = "The discrepancy has no field of its own. You can fasten the applicant’s evidence to the official entry.";
+          if (state.actionStep === 0) {
+            status.innerHTML = 'Emil Voss — deceased';
+            el("action-progress").textContent = "1 · Attach the rent receipt";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="attach">Fasten the receipt to the copy</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          } else {
+            status.innerHTML = 'Emil Voss — deceased<br><span class="annex"><i class="annex-pin" aria-hidden="true"></i>Rent receipt · both signatures</span>';
+            el("action-progress").textContent = "2 · Both accounts are ready to travel together";
+            el("form-actions").innerHTML = '<button class="primary form-action" data-step="sign">Sign and send this copy</button><button class="secondary form-action" data-step="cancel">Set the form aside</button>';
+          }
+        }
+      }
+      function startAction(choice) {
+        state.pendingChoice = choice;
+        state.actionStep = 0;
+        state.actionFeedback = "";
+        renderAction();
+        setStage("action");
+      }
+      function performAction(step) {
+        var form = el("working-form");
+        var feedback = el("action-feedback");
+        if (step === "cancel") {
+          state.pendingChoice = null;
+          setStage("case");
+          return;
+        }
+        document.querySelectorAll(".form-action").forEach(function (button) { button.disabled = true; });
+        form.classList.add("is-working");
+        if (step === "erase") {
+          form.classList.add("scratched");
+          state.actionFeedback = "The nib rasps across the paper. The old word is still legible.";
+          feelAction("scratch");
+          state.actionStep = 1;
+          window.setTimeout(function () { if (state.stage === "action") renderAction(); }, 260);
+          return;
+        }
+        if (step === "write") {
+          state.actionFeedback = "Ink settles into the groove left by the first entry.";
+          feelAction("write"); state.actionStep = 2; window.setTimeout(function () { if (state.stage === "action") renderAction(); }, 180); return;
+        }
+        if (step === "copy") {
+          state.actionFeedback = "You copy the word exactly as it appears in the archive.";
+          feelAction("write"); state.actionStep = 1; window.setTimeout(function () { if (state.stage === "action") renderAction(); }, 180); return;
+        }
+        if (step === "attach") {
+          state.actionFeedback = "The punch clicks. The pages will not separate in the next tray.";
+          feelAction("attach"); state.actionStep = 1; window.setTimeout(function () { if (state.stage === "action") renderAction(); }, 180); return;
+        }
+        if (step === "sign") {
+          document.querySelectorAll(".form-action").forEach(function (button) { button.disabled = true; });
+          el("form-signature").innerHTML = '<span class="signature">M. Klein</span>';
+          el("form-stamp").textContent = "SENT ONWARD";
+          el("form-stamp").classList.add("visible");
+          feedback.textContent = "The stamp comes down. A copy slips into the outgoing tray.";
+          feelAction("stamp");
+          state.currentChoice = state.pendingChoice;
+          if (state.day === 1) state.firstChoice = state.currentChoice;
+          window.setTimeout(function () { finishChoice(state.pendingChoice); }, 650);
+        }
+      }
       function choose(choice) {
-        state.currentChoice = choice;
-        if (state.day === 1) state.firstChoice = choice;
+        startAction(choice);
+      }
+      function finishChoice(choice) {
         var outcome = outcomeFor(choice, state.day);
         el("outcome-eyebrow").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Decision entered";
         el("outcome-title").textContent = outcome.title;
@@ -629,7 +819,7 @@
         }
       }
       function reset() {
-        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, viewed: {}, activeDoc: "registry", markSeen: false };
+        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", markSeen: false, audio: null };
         el("tooltip").hidden = true;
         el("room-note").textContent = "The room is quiet except for the clock and the paper feed in the next office.";
         setStage("welcome");
@@ -638,6 +828,7 @@
         var action = event.target.closest("[data-action]");
         var tab = event.target.closest("[data-doc]");
         var choice = event.target.closest("[data-choice]");
+        var formAction = event.target.closest("[data-step]");
         if (action) {
           var name = action.getAttribute("data-action");
           if (name === "begin") showMorning();
@@ -653,6 +844,10 @@
         }
         if (choice) {
           choose(choice.getAttribute("data-choice"));
+          return;
+        }
+        if (formAction) {
+          performAction(formAction.getAttribute("data-step"));
           return;
         }
       });
