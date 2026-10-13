@@ -62,8 +62,11 @@
       font: 13px Georgia, serif;
     }
     .top-status { display: flex; align-items: center; gap: 18px; }
+    .sound-toggle { min-height: 28px; padding: 4px 8px; border: 1px solid rgba(214,218,203,.24); background: transparent; color: #c7c9bd; cursor: pointer; font: 10px "Courier New",monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .sound-toggle:hover, .sound-toggle:focus-visible { border-color: var(--gold); outline: none; color: #fff4d9; }
     .lamp { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #a4aa8a; box-shadow: 0 0 9px #a4aa8a; }
     .frame {
+      position: relative;
       display: grid;
       grid-template-columns: minmax(275px, .78fr) minmax(500px, 1.22fr);
       min-height: 680px;
@@ -326,6 +329,43 @@
     @keyframes stamp-in { to { opacity:.86; transform:rotate(-8deg) scale(1); } }
     @keyframes scrape { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-2px); } 55% { transform:translateX(2px); } 75% { transform:translateX(-1px); } }
     .working-form.scratched { animation:scrape .2s linear 3; }
+    .working-form.sent { animation:send-form .5s ease-in forwards; }
+    @keyframes send-form { 45% { transform:translate(12px,22px) scale(.96); opacity:1; } to { transform:translate(95px,240px) scale(.75) rotate(4deg); opacity:0; } }
+    .return-slip {
+      position:relative; max-width:490px; margin:17px 0; padding:15px 18px;
+      color:#3d493f; border:1px solid #b8ad9a; background:#e8dfcc;
+      box-shadow:3px 5px 0 rgba(60,66,54,.1); transform:rotate(.35deg);
+    }
+    .return-slip[hidden], .paper-transition[hidden] { display:none; }
+    .return-head { display:flex; justify-content:space-between; gap:10px; padding-bottom:8px; margin-bottom:10px; border-bottom:1px solid #c9bea9; color:#696b5f; font:10px "Courier New",monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .return-slip p { margin:0; color:#354138; font-size:15px; }
+    .return-mark { margin-top:8px; color:#865a4d; font:10px "Courier New",monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .return-memo { margin-top:11px; padding-top:7px; border-top:1px solid #c9bea9; color:#727265; font:10px/1.5 "Courier New",monospace; letter-spacing:.02em; }
+    .crossed { text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:#975f54; color:#756c63; }
+    .inked { color:#344e3e; font-style:italic; }
+    .original-mark { display:inline-block; margin:4px 7px 0 0; padding:3px 5px; border:1px solid #9b6e60; color:#895849; font:10px "Courier New",monospace; transform:rotate(-3deg); }
+    .paper-transition {
+      position:absolute; inset:0; z-index:20; overflow:hidden;
+      background:rgba(21,29,24,.94); color:#e4decf;
+    }
+    .transition-day { position:absolute; top:7%; left:8%; color:#c1c8b7; font:11px "Courier New",monospace; letter-spacing:.17em; text-transform:uppercase; }
+    .transition-tray { position:absolute; width:155px; padding:10px 5px 0; border-top:4px solid #67756a; color:#aab2a4; font:10px "Courier New",monospace; letter-spacing:.17em; text-transform:uppercase; text-align:center; transition:opacity .25s ease; }
+    .transition-tray.outgoing { bottom:14%; right:12%; }
+    .transition-tray.incoming { top:18%; right:12%; opacity:.15; }
+    .paper-transition.returning .outgoing { opacity:.15; }
+    .paper-transition.returning .incoming { opacity:1; }
+    .transition-sheet {
+      position:absolute; left:50%; top:47%; width:min(430px,78%); min-height:208px;
+      padding:19px 21px; color:#2f3d33; border:1px solid #b9ad97;
+      background:repeating-linear-gradient(0deg, transparent 0 25px, rgba(110,103,87,.07) 26px, transparent 27px), #ebe2d0;
+      box-shadow:0 20px 50px rgba(0,0,0,.4); transform:translate(-50%,-50%);
+    }
+    .transition-sheet p { margin:15px 0; color:#35443a; font-size:18px; line-height:1.4; }
+    .transition-sheet .return-mark { margin-top:12px; }
+    .paper-transition.departing .transition-sheet { animation:paper-out .76s ease-in forwards; }
+    .paper-transition.returning .transition-sheet { animation:paper-in .82s ease-out both; }
+    @keyframes paper-out { to { transform:translate(12%,130vh) rotate(8deg) scale(.7); opacity:0; } }
+    @keyframes paper-in { from { transform:translate(-50%,-150vh) rotate(-5deg) scale(.82); opacity:.2; } to { transform:translate(-50%,-50%) rotate(.5deg) scale(1); opacity:1; } }
     .file-total { display: flex; align-items: center; gap: 10px; margin: 22px 0 8px; color: var(--muted); font: 10px "Courier New", monospace; letter-spacing: .09em; text-transform: uppercase; }
     .file-total:after { width: 34px; height: 1px; content: ""; background: var(--line); }
     .final-card { max-width: 520px; margin: 19px 0; padding: 19px 21px; background: #dcd4c3; border: 1px solid #c4baa7; box-shadow: 3px 4px 0 rgba(73,72,61,.1); }
@@ -382,7 +422,8 @@
       body { padding: 9px; }
       .topbar { font-size: 8px; letter-spacing: .08em; }
       .top-status { gap: 9px; }
-      .top-status span:last-child { display: none; }
+      .top-status .loop-text { display: none; }
+      .sound-toggle { padding:3px 5px; font-size:9px; }
       .frame { margin-top: 11px; }
       .room { min-height: 243px; }
       .window { top: 47px; right: 30px; width: 143px; height: 119px; }
@@ -405,7 +446,7 @@
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span class="seal" aria-hidden="true">R</span><span>Civil Records Office&nbsp; / &nbsp;Section IV</span></div>
-      <div class="top-status"><span><i class="lamp"></i>Office open</span><span id="loop-label">First morning</span></div>
+      <div class="top-status"><span><i class="lamp"></i>Office open</span><span class="loop-text" id="loop-label">First morning</span><button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Mute sound">Sound on</button></div>
     </header>
 
     <main class="frame" aria-label="See You Tomorrow, Mr. Klein interactive story">
@@ -438,6 +479,7 @@
             <h2 id="morning-title">The same desk.</h2>
             <p class="lead" id="morning-description"></p>
             <div class="quote" id="guard-line"></div>
+            <div class="return-slip" id="return-slip" hidden aria-label="Returned document"><div class="return-head"><span>Incoming · File 18/4</span><span>Second copy</span></div><p id="return-text"></p><div class="return-mark" id="return-mark"></div><div class="return-memo" id="return-memo"></div></div>
             <p id="morning-residue" class="final-note"></p>
             <button class="primary" data-action="open-file">Open the file <span aria-hidden="true">&nbsp;→</span></button>
           </section>
@@ -509,6 +551,12 @@
         <button class="hidden-entry" id="hidden-entry" aria-label="Read the small yellow note"></button>
         <div class="tooltip" id="tooltip" role="status" hidden>You cannot tell whether it was there before you noticed it.</div>
       </section>
+      <div class="paper-transition" id="paper-transition" hidden aria-live="polite" aria-label="The file travels through the office">
+        <div class="transition-day" id="transition-day">Monday · File 18/4</div>
+        <div class="transition-tray outgoing">Outgoing</div>
+        <div class="transition-tray incoming">Incoming</div>
+        <div class="transition-sheet" id="transition-sheet"><div class="return-head"><span>Household register</span><span>18/4</span></div><p id="transition-text"></p><div class="return-mark" id="transition-mark"></div></div>
+      </div>
     </main>
   </div>
 
@@ -516,12 +564,77 @@
     (function () {
       "use strict";
       var stageNames = ["welcome", "morning", "case", "action", "outcome", "final"];
-      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", markSeen: false, audio: null };
+      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", markSeen: false, transitioning: false };
+      var audioEngine = null;
+      var soundEnabled = true;
+      var musicPulse = 0;
       var labels = { correct: "CORRECTION ENTERED", uphold: "NO AMENDMENT", both: "ANNEX ATTACHED" };
       var docs = {
-        registry: { title: "Registry extract · Form 12", day1: "Emil Voss — deceased. Entry accepted fourteen years ago. The field for household members is blank.", day2: "Emil Voss — deceased. Entry accepted fourteen years ago. A pencil note in the margin reads: “Second copy requested.”" },
-        receipt: { title: "Rent receipt · last month", day1: "Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. The archive has no matching sample.", day2: "Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. It is dated tomorrow." },
-        statement: { title: "Neighbor statement · Building 18", day1: "“No one called Emil has ever lived at number 18. I have been here since before the new records began.” — A. Novak", day2: "“I do not know why you keep asking me about Emil. I have never met Mr. Klein.” — A. Novak" }
+        registry: { title: "Registry extract · Form 12", day1: "Emil Voss — deceased. Entry accepted fourteen years ago. The field for household members is blank." },
+        receipt: { title: "Rent receipt · last month", day1: "Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. The archive has no matching sample." },
+        statement: { title: "Neighbor statement · Building 18", day1: "“No one called Emil has ever lived at number 18. I have been here since before the new records began.” — A. Novak" }
+      };
+      var returns = {
+        correct: {
+          morningTitle: "The amended copy has returned.",
+          morningDescription: "Your correction lies in the incoming tray. The archive line was copied beneath it without being removed.",
+          guard: "“The lift is stuck again,” the guard says. “Your papers came back before I did.”",
+          residue: "The carbon copy keeps the indentation where you crossed out a word.",
+          room: "The paper feed stops just long enough for a page to turn.",
+          caseTitle: "A name in two columns",
+          caseDescription: "Marta has a household entry bearing Emil’s name. The clinic rejects it because the archive still records his death.",
+          statement: "“The clerk at the clinic read his name and still told me to bring proof.”",
+          followup: "She slides a folded appointment slip under the two copies.",
+          status: "Returned · two statuses",
+          returnHtml: 'Emil Voss — <span class="crossed">deceased</span> <span class="inked">resides at this address</span>',
+          returnMark: "Archive: deceased · current register: resident",
+          memo: "Applicant kept a second chair available. Seat count is not a register field.",
+          docs: {
+            registry: { title: "Registry extract · returned copy", html: 'Emil Voss — <span class="crossed">deceased</span> <span class="inked">resides at this address</span>. The archive index retains the earlier status. Both lines carry your initials.' },
+            receipt: { title: "Rent receipt · last month", html: "Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
+            statement: { title: "Neighbor statement · Building 18", html: "“The Voss household has always been two people.” — A. Novak. His signed statement from yesterday remains attached." }
+          }
+        },
+        uphold: {
+          morningTitle: "The envelope has returned.",
+          morningDescription: "A letter sits above your signed refusal. It was not entered in the office’s outgoing mail.",
+          guard: "“The lift is stuck again,” the guard says. “The postman left these by my desk.”",
+          residue: "Marta’s name appears in the refusal’s signature field. The carbon beneath it is smooth.",
+          room: "A returned envelope rests against the incoming tray.",
+          caseTitle: "A letter with no addressee",
+          caseDescription: "Marta needs the letter delivered to Emil before the housing office will renew their tenancy. The post has returned it under the archived status.",
+          statement: "“If he cannot receive a letter here, they will take his name off the lease.”",
+          followup: "She holds the unopened envelope by its corners. It has no return address.",
+          status: "Returned · undeliverable",
+          returnHtml: "To: Emil Voss<br>18, Building 4",
+          returnMark: "Returned by post · addressee deceased",
+          memo: "Applicant kept a second chair available. No additional resident is recorded.",
+          docs: {
+            registry: { title: "Registry extract · refusal copy", html: "Emil Voss — deceased. No amendment entered. The applicant signature field bears Marta’s name; the carbon sheet beneath it has no impression." },
+            receipt: { title: "Rent receipt · last month", html: "Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
+            statement: { title: "Neighbor statement · Building 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. The housing office has requested a copy." }
+          }
+        },
+        both: {
+          morningTitle: "Two originals in the tray.",
+          morningDescription: "The annex has returned attached to the registry extract. Both pages are stamped ORIGINAL. The routing slip says CONSISTENT.",
+          guard: "“The lift is stuck again,” the guard says. “I left your tray as I found it.”",
+          residue: "The staple has been bent twice but has never been removed.",
+          room: "Two pages settle together in the incoming tray.",
+          caseTitle: "Which original goes home?",
+          caseDescription: "Marta needs proof of payment for her landlord. The office will release one original but cannot distinguish the two attached pages.",
+          statement: "“They said I could collect the original. Which of these can I take?”",
+          followup: "Her hand stops at the staple. Pulling either sheet free would tear the other.",
+          status: "Returned · duplicate original",
+          returnHtml: '<span class="original-mark">Original</span> Registry extract<br><span class="original-mark">Original</span> Rent receipt',
+          returnMark: "Routing status: consistent",
+          memo: "Applicant kept a second chair available. Accounts retained together; seat count omitted.",
+          docs: {
+            registry: { title: "Registry extract · sheet 1 of 2", html: 'Emil Voss — deceased. <span class="original-mark">Original</span> The attached receipt has the same file number.' },
+            receipt: { title: "Rent receipt · sheet 2 of 2", html: 'Paid in full by M. Voss and E. Voss. <span class="original-mark">Original</span> The staple crosses both seals.' },
+            statement: { title: "Neighbor statement · Building 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. Statement filed separately from the bound originals." }
+          }
+        }
       };
 
       var el = function (id) { return document.getElementById(id); };
@@ -536,6 +649,7 @@
           el("stage-" + stage).classList.toggle("active", stage === name);
         });
         document.querySelector(".page-content").scrollTop = 0;
+        setSoundMood(name);
         updateStatus();
       }
       function updateStatus() {
@@ -558,46 +672,54 @@
       }
       function showMorning() {
         var first = state.day === 1;
+        var returned = first ? null : returns[state.firstChoice];
         el("morning-eyebrow").textContent = (first ? "Monday" : "Tuesday") + " · 08:14";
-        el("morning-title").textContent = first ? "The same desk." : "The desk has not moved.";
+        el("morning-title").textContent = first ? "The same desk." : returned.morningTitle;
         el("morning-description").textContent = first
           ? "The clock is already running. A file waits where the blotter ends."
-          : "The case number is familiar. The date on the cover says it arrived this morning.";
+          : returned.morningDescription;
         el("guard-line").textContent = first
           ? "“Morning, Mr. Klein. Your desk is exactly where you left it.”"
-          : "“Morning, Mr. Klein. Did I give you this file yesterday?” The guard has already forgotten asking.";
+          : returned.guard;
         el("morning-residue").textContent = first
           ? "A tray marked INCOMING is empty. The paper-feed in the next office keeps moving."
-          : "A small yellow mark has appeared on the glass. The rain runs around it.";
+          : returned.residue;
         el("room-note").textContent = first
           ? "The room is quiet except for the clock and the paper feed in the next office."
-          : "The paper feed continues. The clock has returned to 08:14.";
+          : returned.room;
+        el("return-slip").hidden = first;
+        if (!first) {
+          el("return-text").innerHTML = returned.returnHtml;
+          el("return-mark").textContent = returned.returnMark;
+          el("return-memo").textContent = returned.memo;
+        }
         el("case-eyebrow").textContent = (first ? "Monday" : "Tuesday") + " · Case 18/4";
+        el("case-title").textContent = first ? "A name returned to the register" : returned.caseTitle;
         el("case-description").textContent = first
           ? "Marta Voss asks to restore her husband Emil to the household register. The archive has recorded him as deceased for fourteen years."
-          : "Marta Voss has returned for a copy. The system has opened a new request under the same case number; it cannot find yesterday’s decision.";
+          : returned.caseDescription;
         el("applicant-statement").textContent = first
           ? "“My husband is not dead. The register says he is. I need his name on the household record.”"
-          : "“You said the file was complete. Why did the post return his letter?”";
+          : returned.statement;
         el("applicant-followup").textContent = first
           ? "She keeps one hand on the envelope. The other rests on the chair beside her."
-          : "She places the same envelope on the desk. The date on its postmark is tomorrow.";
-        el("case-status").textContent = first ? "Pending" : "New request";
+          : returned.followup;
+        el("case-status").textContent = first ? "Pending" : returned.status;
         state.viewed = {};
         state.activeDoc = "registry";
         renderEvidence();
         setStage("morning");
       }
       function renderEvidence() {
-        var doc = docs[state.activeDoc];
-        var text = state.day === 1 ? doc.day1 : doc.day2;
+        var doc = state.day === 1 ? docs[state.activeDoc] : returns[state.firstChoice].docs[state.activeDoc];
+        var content = state.day === 1 ? esc(doc.day1) : doc.html;
         state.viewed[state.activeDoc] = true;
         document.querySelectorAll(".doc-tab").forEach(function (tab) {
           var active = tab.getAttribute("data-doc") === state.activeDoc;
           tab.setAttribute("aria-selected", active ? "true" : "false");
           tab.setAttribute("aria-pressed", active ? "true" : "false");
         });
-        el("evidence-view").innerHTML = '<div class="evidence-index">' + esc(doc.title) + '</div><p>' + esc(text) + '</p>';
+        el("evidence-view").innerHTML = '<div class="evidence-index">' + esc(doc.title) + '</div><p>' + content + '</p>';
         var count = Object.keys(state.viewed).length;
         el("evidence-count").textContent = count ? "· " + count + " of 3 opened" : "";
       }
@@ -649,38 +771,109 @@
           stamp: "DUPLICATE ORIGINAL"
         };
       }
-      function playActionSound(kind) {
+      function ensureAudio() {
+        if (!soundEnabled) return null;
         try {
           var AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContext) return;
-          if (!state.audio) state.audio = new AudioContext();
-          if (state.audio.state === "suspended") state.audio.resume();
-          var ctx = state.audio;
-          var now = ctx.currentTime;
-          if (kind === "stamp") {
-            var osc = ctx.createOscillator();
-            var gain = ctx.createGain();
-            osc.type = "triangle";
-            osc.frequency.setValueAtTime(125, now);
-            osc.frequency.exponentialRampToValueAtTime(54, now + .075);
-            gain.gain.setValueAtTime(.0001, now);
-            gain.gain.exponentialRampToValueAtTime(.13, now + .008);
-            gain.gain.exponentialRampToValueAtTime(.0001, now + .12);
-            osc.connect(gain); gain.connect(ctx.destination); osc.start(now); osc.stop(now + .13);
-          } else {
-            var length = Math.floor(ctx.sampleRate * (kind === "scratch" ? .18 : .095));
-            var buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-            var data = buffer.getChannelData(0);
-            for (var i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length);
-            var source = ctx.createBufferSource();
-            var filter = ctx.createBiquadFilter();
-            var level = ctx.createGain();
-            source.buffer = buffer;
-            filter.type = "lowpass"; filter.frequency.value = kind === "scratch" ? 1650 : 2400;
-            level.gain.value = kind === "scratch" ? .17 : .095;
-            source.connect(filter); filter.connect(level); level.connect(ctx.destination); source.start(now);
+          if (!AudioContext) return null;
+          if (audioEngine) {
+            if (audioEngine.ctx.state === "suspended") audioEngine.ctx.resume();
+            return audioEngine;
           }
-        } catch (e) { /* Sound is decorative; the interaction remains available without audio. */ }
+          var ctx = new AudioContext();
+          var master = ctx.createGain();
+          master.gain.value = 1;
+          master.connect(ctx.destination);
+          var music = ctx.createGain();
+          music.gain.value = 0;
+          music.connect(master);
+          var effects = ctx.createGain();
+          effects.gain.value = 1;
+          effects.connect(master);
+          var rain = ctx.createGain();
+          rain.gain.value = 0;
+          rain.connect(master);
+          var hum = ctx.createOscillator();
+          var humGain = ctx.createGain();
+          hum.type = "sine"; hum.frequency.value = 55; humGain.gain.value = .009;
+          hum.connect(humGain); humGain.connect(music); hum.start();
+          var bass = ctx.createOscillator();
+          var bassGain = ctx.createGain();
+          bass.type = "sine"; bass.frequency.value = 73.42; bassGain.gain.value = .018;
+          bass.connect(bassGain); bassGain.connect(music); bass.start();
+          var noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 3), ctx.sampleRate);
+          var noiseData = noise.getChannelData(0);
+          var smooth = 0;
+          for (var n = 0; n < noiseData.length; n++) {
+            smooth = smooth * .7 + (Math.random() * 2 - 1) * .3;
+            noiseData[n] = smooth;
+          }
+          var rainSource = ctx.createBufferSource();
+          var rainFilter = ctx.createBiquadFilter();
+          rainSource.buffer = noise; rainSource.loop = true;
+          rainFilter.type = "lowpass"; rainFilter.frequency.value = 950;
+          rainSource.connect(rainFilter); rainFilter.connect(rain); rainSource.start();
+          audioEngine = { ctx: ctx, master: master, music: music, effects: effects, rain: rain };
+          setSoundMood(state.stage);
+          window.setInterval(playMusicNote, 4400);
+          playMusicNote();
+          return audioEngine;
+        } catch (e) { return null; }
+      }
+      function setSoundMood(stage) {
+        if (!audioEngine) return;
+        var ctx = audioEngine.ctx;
+        var level = { welcome: 0, morning: .32, case: .4, action: .22, outcome: .27, final: .25, transition: .47 }[stage] || 0;
+        audioEngine.music.gain.setTargetAtTime(level, ctx.currentTime, .45);
+        audioEngine.rain.gain.setTargetAtTime(stage === "welcome" ? 0 : .028, ctx.currentTime, .5);
+      }
+      function playMusicNote() {
+        if (!audioEngine || !soundEnabled || state.stage === "welcome" || document.hidden) return;
+        var ctx = audioEngine.ctx;
+        var notes = state.day === 1 ? [146.83, 0, 174.61, 164.81] : [146.83, 155.56, 0, 174.61];
+        var frequency = notes[musicPulse++ % notes.length];
+        if (!frequency) return;
+        var now = ctx.currentTime;
+        var voice = ctx.createOscillator();
+        var harmonic = ctx.createOscillator();
+        var envelope = ctx.createGain();
+        voice.type = "sine"; voice.frequency.value = frequency;
+        harmonic.type = "triangle"; harmonic.frequency.value = frequency * 2;
+        envelope.gain.setValueAtTime(.0001, now);
+        envelope.gain.exponentialRampToValueAtTime(.075, now + .012);
+        envelope.gain.exponentialRampToValueAtTime(.0001, now + 2.3);
+        voice.connect(envelope); harmonic.connect(envelope); envelope.connect(audioEngine.music);
+        voice.start(now); harmonic.start(now);
+        voice.stop(now + 2.4); harmonic.stop(now + 2.4);
+      }
+      function playActionSound(kind) {
+        var engine = ensureAudio();
+        if (!engine) return;
+        var ctx = engine.ctx;
+        var now = ctx.currentTime;
+        if (kind === "stamp" || kind === "attach") {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = kind === "stamp" ? "triangle" : "sine";
+          osc.frequency.setValueAtTime(kind === "stamp" ? 125 : 430, now);
+          osc.frequency.exponentialRampToValueAtTime(kind === "stamp" ? 54 : 140, now + .075);
+          gain.gain.setValueAtTime(.0001, now);
+          gain.gain.exponentialRampToValueAtTime(kind === "stamp" ? .13 : .07, now + .008);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + .12);
+          osc.connect(gain); gain.connect(engine.effects); osc.start(now); osc.stop(now + .13);
+        } else {
+          var length = Math.floor(ctx.sampleRate * (kind === "slide" ? .34 : kind === "scratch" ? .18 : .095));
+          var buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+          var data = buffer.getChannelData(0);
+          for (var i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length);
+          var source = ctx.createBufferSource();
+          var filter = ctx.createBiquadFilter();
+          var level = ctx.createGain();
+          source.buffer = buffer;
+          filter.type = "lowpass"; filter.frequency.value = kind === "scratch" ? 1650 : kind === "slide" ? 850 : 2400;
+          level.gain.value = kind === "scratch" ? .17 : kind === "slide" ? .07 : .095;
+          source.connect(filter); filter.connect(level); level.connect(engine.effects); source.start(now);
+        }
       }
       function feelAction(kind) {
         playActionSound(kind);
@@ -694,7 +887,7 @@
         stamp.textContent = "RECEIVED";
         stamp.classList.remove("visible");
         signature.innerHTML = "____________________________";
-        el("working-form").classList.remove("is-working", "scratched");
+        el("working-form").classList.remove("is-working", "scratched", "sent");
         el("form-copy-label").textContent = state.day === 1 ? "Clerk’s copy" : "Second copy";
         el("action-eyebrow").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Clerk’s copy";
         el("action-feedback").textContent = state.actionFeedback || "";
@@ -786,7 +979,8 @@
           feelAction("stamp");
           state.currentChoice = state.pendingChoice;
           if (state.day === 1) state.firstChoice = state.currentChoice;
-          window.setTimeout(function () { finishChoice(state.pendingChoice); }, 650);
+          window.setTimeout(function () { form.classList.add("sent"); playActionSound("slide"); }, 260);
+          window.setTimeout(function () { finishChoice(state.pendingChoice); }, 820);
         }
       }
       function choose(choice) {
@@ -804,8 +998,7 @@
       }
       function closeDay() {
         if (state.day === 1) {
-          state.day = 2;
-          showMorning();
+          carryPaperToMorning();
         } else {
           var same = state.firstChoice === state.currentChoice;
           var firstLabel = labels[state.firstChoice].toLowerCase();
@@ -818,8 +1011,44 @@
           el("room-note").textContent = "The office closes. The paper feed in the next room continues.";
         }
       }
+      function carryPaperToMorning() {
+        if (state.transitioning) return;
+        state.transitioning = true;
+        var choice = state.firstChoice;
+        var departed = {
+          correct: { html: 'Emil Voss — <span class="crossed">deceased</span> <span class="inked">resides at this address</span>', mark: "Correction entered · signed M. Klein" },
+          uphold: { html: "Emil Voss — deceased", mark: "No amendment · signed M. Klein" },
+          both: { html: 'Emil Voss — deceased<br><span class="original-mark">Annex</span> Rent receipt', mark: "Both accounts attached · signed M. Klein" }
+        }[choice];
+        var overlay = el("paper-transition");
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        el("transition-day").textContent = "Monday · Outgoing · 18/4";
+        el("transition-text").innerHTML = departed.html;
+        el("transition-mark").textContent = departed.mark;
+        overlay.hidden = false;
+        overlay.className = "paper-transition departing";
+        setSoundMood("transition");
+        playActionSound("slide");
+        window.setTimeout(function () {
+          state.day = 2;
+          showMorning();
+          el("transition-day").textContent = "Tuesday · Incoming · 08:14";
+          el("transition-text").innerHTML = returns[choice].returnHtml;
+          el("transition-mark").textContent = returns[choice].returnMark;
+          overlay.className = "paper-transition returning";
+          setSoundMood("transition");
+          playActionSound("slide");
+          window.setTimeout(function () {
+            overlay.hidden = true;
+            overlay.className = "paper-transition";
+            state.transitioning = false;
+            setSoundMood(state.stage);
+          }, reduced ? 420 : 930);
+        }, reduced ? 420 : 780);
+      }
       function reset() {
-        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", markSeen: false, audio: null };
+        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", markSeen: false, transitioning: false };
+        el("paper-transition").hidden = true;
         el("tooltip").hidden = true;
         el("room-note").textContent = "The room is quiet except for the clock and the paper feed in the next office.";
         setStage("welcome");
@@ -831,7 +1060,7 @@
         var formAction = event.target.closest("[data-step]");
         if (action) {
           var name = action.getAttribute("data-action");
-          if (name === "begin") showMorning();
+          if (name === "begin") { showMorning(); ensureAudio(); }
           if (name === "open-file") setStage("case");
           if (name === "next") closeDay();
           if (name === "restart") reset();
@@ -857,6 +1086,21 @@
       });
       el("hidden-entry").addEventListener("click", function () {
         el("tooltip").hidden = false;
+      });
+      el("sound-toggle").addEventListener("click", function () {
+        soundEnabled = !soundEnabled;
+        var button = el("sound-toggle");
+        button.textContent = soundEnabled ? "Sound on" : "Sound off";
+        button.setAttribute("aria-pressed", soundEnabled ? "true" : "false");
+        button.setAttribute("aria-label", soundEnabled ? "Mute sound" : "Unmute sound");
+        if (soundEnabled) ensureAudio();
+        if (audioEngine) {
+          audioEngine.master.gain.setTargetAtTime(soundEnabled ? 1 : 0, audioEngine.ctx.currentTime, .04);
+          if (soundEnabled) { setSoundMood(state.stage); playMusicNote(); }
+        }
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (audioEngine) audioEngine.master.gain.setTargetAtTime(soundEnabled && !document.hidden ? 1 : 0, audioEngine.ctx.currentTime, .07);
       });
       updateStatus();
     }());
