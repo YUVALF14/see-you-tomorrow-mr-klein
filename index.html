@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#202722">
+  <title>See You Tomorrow, Mr. Klein — Interactive Demo</title>
+  <style>
+    :root {
+      --night: #202722;
+      --night-soft: #2b342e;
+      --ink: #28332d;
+      --ink-light: #566057;
+      --muted: #77796f;
+      --paper: #e8e0ce;
+      --paper-light: #f0eadb;
+      --paper-dark: #d8cfbc;
+      --line: #c4bba9;
+      --green: #687268;
+      --green-dark: #3c4941;
+      --red: #985d50;
+      --gold: #b49a6b;
+      --yellow: #d3bd69;
+      --shadow: rgba(8, 13, 10, .32);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--night); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      color: #e7e5da;
+      background:
+        radial-gradient(ellipse at 22% 0%, rgba(117, 132, 117, .12), transparent 42%),
+        linear-gradient(145deg, #27312b 0%, #1b211d 72%);
+      font: 15px/1.5 Georgia, "Times New Roman", serif;
+    }
+    button { color: inherit; font: inherit; }
+    .shell { width: min(1180px, 100%); margin: 0 auto; }
+    .topbar {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 2px 16px;
+      color: #c7c9bd;
+      border-bottom: 1px solid rgba(214, 218, 203, .16);
+      font: 10px/1.2 "Courier New", monospace;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .seal {
+      display: grid;
+      place-items: center;
+      width: 29px;
+      height: 29px;
+      color: var(--paper);
+      border: 1px solid #8c978a;
+      border-radius: 50%;
+      font: 13px Georgia, serif;
+    }
+    .top-status { display: flex; align-items: center; gap: 18px; }
+    .lamp { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #a4aa8a; box-shadow: 0 0 9px #a4aa8a; }
+    .frame {
+      display: grid;
+      grid-template-columns: minmax(275px, .78fr) minmax(500px, 1.22fr);
+      min-height: 680px;
+      margin-top: 20px;
+      overflow: hidden;
+      border: 1px solid #667167;
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 30px 90px var(--shadow);
+    }
+    .room {
+      position: relative;
+      min-height: 680px;
+      overflow: hidden;
+      padding: 30px 28px;
+      color: #e1e2d6;
+      background:
+        linear-gradient(90deg, rgba(17, 24, 20, .15), transparent 30%, rgba(9, 14, 11, .2)),
+        linear-gradient(180deg, #526055 0%, #465248 58%, #303a33 58%, #29322c 100%);
+    }
+    .room:after {
+      position: absolute;
+      right: -10%;
+      bottom: 0;
+      left: -10%;
+      height: 43%;
+      content: "";
+      background: linear-gradient(180deg, rgba(20, 27, 22, .05), rgba(9, 14, 11, .42));
+      border-top: 1px solid rgba(205, 205, 185, .12);
+      pointer-events: none;
+    }
+    .room-label, .room-foot, .paper-label, .eyebrow, .stamp-label, .evidence-index {
+      font: 10px/1.4 "Courier New", monospace;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .room-label { position: relative; z-index: 1; color: #c6cabb; }
+    .window {
+      position: absolute;
+      top: 106px;
+      left: 50%;
+      width: min(65%, 260px);
+      height: 220px;
+      transform: translateX(-50%);
+      border: 9px solid #37433b;
+      background:
+        linear-gradient(90deg, transparent 48.5%, rgba(38, 48, 42, .88) 49%, rgba(38, 48, 42, .88) 51%, transparent 51.5%),
+        linear-gradient(180deg, transparent 48%, rgba(38, 48, 42, .88) 49%, rgba(38, 48, 42, .88) 51%, transparent 52%),
+        linear-gradient(180deg, #778174, #a4a28d 58%, #777e71);
+      box-shadow: 0 12px 28px rgba(8, 13, 10, .3), inset 0 0 0 1px rgba(234, 227, 199, .2);
+    }
+    .window:before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      opacity: .34;
+      background: repeating-linear-gradient(104deg, transparent 0 17px, rgba(224, 226, 211, .36) 18px, transparent 19px 43px);
+      animation: rain 8s linear infinite;
+    }
+    .window:after {
+      position: absolute;
+      right: -18px;
+      bottom: -12px;
+      left: -18px;
+      height: 12px;
+      content: "";
+      background: #39463d;
+      box-shadow: 0 7px 12px rgba(5, 9, 7, .32);
+    }
+    @keyframes rain { from { background-position: 0 0; } to { background-position: -24px 120px; } }
+    .clock {
+      position: absolute;
+      top: 370px;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 84px;
+      height: 84px;
+      transform: translateX(-50%);
+      color: #c6c8b9;
+      border: 1px solid rgba(226, 222, 199, .5);
+      border-radius: 50%;
+      background: rgba(24, 31, 26, .2);
+      box-shadow: inset 0 0 0 5px rgba(29, 37, 31, .12);
+      font: 13px "Courier New", monospace;
+    }
+    .clock:before, .clock:after { position: absolute; left: 50%; bottom: 50%; width: 1px; content: ""; background: #ddd9c7; transform-origin: bottom; }
+    .clock:before { height: 24px; transform: rotate(28deg); }
+    .clock:after { height: 17px; transform: rotate(126deg); }
+    .room-note {
+      position: absolute;
+      right: 24px;
+      bottom: 86px;
+      left: 24px;
+      z-index: 2;
+      padding: 16px 17px;
+      color: #d5d5c8;
+      border-left: 2px solid var(--gold);
+      background: rgba(18, 25, 20, .28);
+      font-size: 14px;
+      font-style: italic;
+    }
+    .room-foot { position: absolute; right: 27px; bottom: 26px; left: 27px; z-index: 2; display: flex; justify-content: space-between; color: #aab0a3; }
+    .yellow-mark {
+      position: absolute;
+      z-index: 3;
+      top: 206px;
+      right: calc(50% - 103px);
+      width: 7px;
+      height: 27px;
+      padding: 0;
+      border: 0;
+      border-radius: 1px;
+      background: var(--yellow);
+      box-shadow: 0 0 12px rgba(211, 189, 105, .28);
+      cursor: pointer;
+      opacity: .9;
+      transition: transform .2s ease, height .2s ease;
+    }
+    .yellow-mark:hover, .yellow-mark:focus-visible { height: 42px; transform: rotate(9deg); outline: none; }
+    .desk {
+      position: relative;
+      min-width: 0;
+      padding: 29px clamp(23px, 4vw, 50px) 34px;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, .38), transparent 39%),
+        repeating-linear-gradient(0deg, rgba(84, 74, 56, .018) 0 1px, transparent 1px 4px),
+        var(--paper);
+    }
+    .desk:before { position: absolute; top: 0; bottom: 0; left: 0; width: 7px; content: ""; background: linear-gradient(90deg, rgba(50, 54, 45, .11), transparent); }
+    .desk-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
+    .dept { color: var(--green-dark); font: 10px/1.5 "Courier New", monospace; letter-spacing: .15em; text-transform: uppercase; }
+    .workday { padding: 5px 9px; color: var(--muted); border: 1px solid var(--line); font: 10px "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .page-content { min-height: 500px; padding-top: 27px; }
+    .stage { display: none; animation: arrive .34s ease both; }
+    .stage.active { display: block; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 610px; margin-bottom: 18px; font-size: clamp(34px, 4.3vw, 52px); font-weight: 400; line-height: 1.04; letter-spacing: -.035em; }
+    h2 { margin-bottom: 11px; font-size: clamp(25px, 3vw, 35px); font-weight: 400; line-height: 1.13; letter-spacing: -.02em; }
+    h3 { margin-bottom: 7px; font-size: 18px; font-weight: 400; }
+    p { color: #4d574f; }
+    .eyebrow { margin-bottom: 10px; color: var(--red); }
+    .lead { max-width: 540px; color: #596057; font-size: 17px; line-height: 1.56; }
+    .quote { max-width: 530px; margin: 26px 0; padding: 17px 19px; border-left: 2px solid var(--gold); background: rgba(255,255,255,.25); font-size: 19px; line-height: 1.45; }
+    .small-meta { margin: 25px 0 7px; color: var(--muted); font: 10px "Courier New", monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .primary, .secondary, .choice, .doc-tab, .restart {
+      border: 1px solid var(--green-dark);
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease, transform .18s ease, border-color .18s ease;
+    }
+    .primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 45px;
+      margin-top: 13px;
+      padding: 0 19px;
+      color: var(--paper-light);
+      background: var(--green-dark);
+      letter-spacing: .015em;
+    }
+    .primary:hover, .primary:focus-visible { background: #26372e; outline: 2px solid var(--gold); outline-offset: 2px; }
+    .secondary {
+      min-height: 40px;
+      padding: 0 14px;
+      color: var(--green-dark);
+      background: transparent;
+    }
+    .secondary:hover, .secondary:focus-visible { background: rgba(104,114,104,.12); outline: 1px solid var(--gold); }
+    .paper-slip {
+      position: relative;
+      max-width: 490px;
+      margin: 25px 0 20px;
+      padding: 20px 22px 19px;
+      border: 1px solid #c9c0ae;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 25px, rgba(110, 103, 87, .075) 26px, transparent 27px),
+        var(--paper-light);
+      box-shadow: 0 8px 17px rgba(47, 43, 34, .09);
+    }
+    .paper-slip:after { position: absolute; top: -1px; right: -1px; width: 0; height: 0; content: ""; border-top: 18px solid var(--paper-dark); border-left: 18px solid transparent; }
+    .paper-label { margin-bottom: 12px; color: var(--muted); }
+    .case-ref { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 9px; margin-bottom: 12px; border-bottom: 1px solid #d4ccba; color: #657065; font: 10px "Courier New", monospace; letter-spacing: .09em; text-transform: uppercase; }
+    .applicant-voice { margin: 15px 0 0; padding-left: 13px; border-left: 1px solid var(--gold); color: #4f584f; font-style: italic; }
+    .evidence-title { margin: 22px 0 9px; color: var(--muted); font: 10px "Courier New", monospace; letter-spacing: .13em; text-transform: uppercase; }
+    .evidence-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .doc-tab { padding: 7px 10px; color: #566057; border-color: #b9b3a5; background: rgba(255,255,255,.27); font-size: 12px; }
+    .doc-tab:hover, .doc-tab[aria-pressed="true"] { color: var(--paper-light); border-color: var(--green-dark); background: var(--green-dark); }
+    .doc-tab:focus-visible, .choice:focus-visible, .restart:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .evidence-view {
+      min-height: 108px;
+      margin-top: 8px;
+      padding: 14px 16px;
+      border: 1px solid #c8c0b1;
+      background: rgba(244, 239, 226, .74);
+    }
+    .evidence-index { margin-bottom: 7px; color: var(--red); font-size: 9px; }
+    .evidence-view p { margin-bottom: 0; color: #39443c; font-size: 14px; line-height: 1.5; }
+    .choices-label { display: flex; justify-content: space-between; gap: 12px; margin: 22px 0 8px; color: var(--muted); font: 10px "Courier New", monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .choices { display: grid; gap: 7px; }
+    .choice {
+      display: grid;
+      grid-template-columns: 26px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 48px;
+      padding: 8px 13px;
+      color: var(--ink);
+      border-color: #bdb5a6;
+      background: rgba(255,255,255,.24);
+      text-align: left;
+    }
+    .choice:hover { transform: translateX(2px); border-color: var(--green-dark); background: rgba(255,255,255,.52); }
+    .choice-key { display: grid; place-items: center; width: 22px; height: 22px; color: var(--green-dark); border: 1px solid #a9a795; border-radius: 50%; font: 11px "Courier New", monospace; }
+    .choice small { color: var(--muted); font: 9px "Courier New", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .stamp {
+      display: inline-block;
+      transform: rotate(-4deg);
+      margin: 4px 0 19px;
+      padding: 5px 11px 4px;
+      color: #815348;
+      border: 2px solid rgba(152, 93, 80, .66);
+      font: bold 13px "Courier New", monospace;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .outcome-copy { max-width: 515px; padding: 16px 19px; border-left: 2px solid var(--gold); background: rgba(255,255,255,.25); }
+    .outcome-copy p:last-child { margin-bottom: 0; }
+    .file-total { display: flex; align-items: center; gap: 10px; margin: 22px 0 8px; color: var(--muted); font: 10px "Courier New", monospace; letter-spacing: .09em; text-transform: uppercase; }
+    .file-total:after { width: 34px; height: 1px; content: ""; background: var(--line); }
+    .final-card { max-width: 520px; margin: 19px 0; padding: 19px 21px; background: #dcd4c3; border: 1px solid #c4baa7; box-shadow: 3px 4px 0 rgba(73,72,61,.1); }
+    .final-card p { margin-bottom: 0; color: #354138; font-size: 16px; }
+    .final-note { max-width: 520px; margin: 19px 0; color: #65685f; font-size: 13px; font-style: italic; }
+    .restart { min-height: 42px; padding: 0 15px; color: var(--green-dark); border-color: #879084; background: transparent; }
+    .restart:hover { color: var(--paper-light); background: var(--green-dark); }
+    .statusline { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 21px; padding-top: 12px; border-top: 1px solid rgba(97,100,88,.24); color: var(--muted); font: 9px "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; }
+    .hidden-entry {
+      position: absolute;
+      right: 18px;
+      bottom: 17px;
+      width: 8px;
+      height: 8px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: var(--yellow);
+      opacity: .48;
+      cursor: pointer;
+    }
+    .hidden-entry:hover, .hidden-entry:focus-visible { opacity: 1; outline: 2px solid rgba(180,154,107,.55); outline-offset: 4px; }
+    .tooltip {
+      position: absolute;
+      right: 10px;
+      bottom: 35px;
+      width: min(230px, 70vw);
+      padding: 10px 12px;
+      color: #ece5d3;
+      background: var(--night-soft);
+      border: 1px solid #788174;
+      box-shadow: 0 7px 22px rgba(0,0,0,.2);
+      font: 11px/1.45 "Courier New", monospace;
+      letter-spacing: .02em;
+    }
+    .tooltip[hidden] { display: none; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 850px) {
+      body { padding: 13px; }
+      .frame { grid-template-columns: 1fr; }
+      .room { min-height: 275px; padding: 19px 21px; }
+      .window { top: 57px; left: auto; right: 53px; width: 175px; height: 143px; transform: none; }
+      .clock { top: 72px; left: 48px; width: 67px; height: 67px; transform: none; }
+      .clock:before { height: 18px; }
+      .clock:after { height: 14px; }
+      .room-note { right: 21px; bottom: 45px; left: 21px; max-width: 440px; padding: 9px 12px; font-size: 12px; }
+      .room-foot { right: 21px; bottom: 14px; left: 21px; }
+      .yellow-mark { top: 119px; right: 185px; }
+      .room:after { height: 27%; }
+      .desk { padding: 24px clamp(20px, 5vw, 42px) 30px; }
+      .page-content { min-height: 470px; }
+    }
+    @media (max-width: 520px) {
+      body { padding: 9px; }
+      .topbar { font-size: 8px; letter-spacing: .08em; }
+      .top-status { gap: 9px; }
+      .top-status span:last-child { display: none; }
+      .frame { margin-top: 11px; }
+      .room { min-height: 243px; }
+      .window { top: 47px; right: 30px; width: 143px; height: 119px; }
+      .clock { top: 60px; left: 29px; width: 59px; height: 59px; }
+      .room-note { bottom: 41px; }
+      .yellow-mark { top: 99px; right: 145px; }
+      .desk { padding: 20px 17px 28px; }
+      .page-content { min-height: 500px; padding-top: 22px; }
+      .case-ref { font-size: 9px; }
+      .choice { grid-template-columns: 24px 1fr; }
+      .choice small { grid-column: 2; }
+      .statusline { align-items: flex-start; font-size: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *:before, *:after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="seal" aria-hidden="true">R</span><span>Civil Records Office&nbsp; / &nbsp;Section IV</span></div>
+      <div class="top-status"><span><i class="lamp"></i>Office open</span><span id="loop-label">First morning</span></div>
+    </header>
+
+    <main class="frame" aria-label="See You Tomorrow, Mr. Klein interactive story">
+      <aside class="room" aria-label="The records office">
+        <div class="room-label">Room 4 · Registry &amp; Amendments</div>
+        <div class="window" aria-hidden="true"></div>
+        <button class="yellow-mark" id="yellow-mark" aria-label="Look at the small mark on the glass" title="A small mark on the glass"></button>
+        <div class="clock" id="clock" aria-label="8:14">08:14</div>
+        <div class="room-note" id="room-note">The room is quiet except for the clock and the paper feed in the next office.</div>
+        <div class="room-foot"><span>Desk 14</span><span id="day-foot">Monday · 08:14</span></div>
+      </aside>
+
+      <section class="desk">
+        <div class="desk-head">
+          <div class="dept">Civil Status &amp; Household Register<br>Desk 14 · Mr. Klein</div>
+          <div class="workday" id="workday">Before opening</div>
+        </div>
+        <div class="page-content" id="page-content" aria-live="polite">
+          <section class="stage active" id="stage-welcome">
+            <p class="eyebrow">A short interactive narrative</p>
+            <h1>See You Tomorrow,<br>Mr. Klein</h1>
+            <p class="lead">A routine correction. Two records that cannot both be right. The office is waiting for a version it can file.</p>
+            <div class="quote">“The form is complete, Mr. Klein. It only needs to be made consistent.”</div>
+            <div class="small-meta">One case · Two mornings · No complete explanation</div>
+            <button class="primary" data-action="begin">Begin the workday <span aria-hidden="true">&nbsp;→</span></button>
+          </section>
+
+          <section class="stage" id="stage-morning">
+            <p class="eyebrow" id="morning-eyebrow">Monday · 08:14</p>
+            <h2 id="morning-title">The same desk.</h2>
+            <p class="lead" id="morning-description"></p>
+            <div class="quote" id="guard-line"></div>
+            <p id="morning-residue" class="final-note"></p>
+            <button class="primary" data-action="open-file">Open the file <span aria-hidden="true">&nbsp;→</span></button>
+          </section>
+
+          <section class="stage" id="stage-case">
+            <p class="eyebrow" id="case-eyebrow">Monday · Case 18/4</p>
+            <h2 id="case-title">A name returned to the register</h2>
+            <p class="lead" id="case-description"></p>
+            <div class="paper-slip">
+              <div class="case-ref"><span>Request 18 / 4</span><span id="case-status">Pending</span></div>
+              <div class="paper-label">Applicant’s statement</div>
+              <p id="applicant-statement" style="margin-bottom:0;color:#3d493f">“My husband is not dead. The register says he is. I need his name on the household record.”</p>
+              <p class="applicant-voice" id="applicant-followup">She keeps one hand on the envelope. The other rests on the chair beside her.</p>
+            </div>
+            <div class="evidence-title">Evidence attached to the request <span id="evidence-count"></span></div>
+            <div class="evidence-tabs" role="tablist" aria-label="Case documents">
+              <button class="doc-tab" role="tab" aria-selected="true" aria-pressed="true" data-doc="registry">Registry extract</button>
+              <button class="doc-tab" role="tab" aria-selected="false" aria-pressed="false" data-doc="receipt">Rent receipt</button>
+              <button class="doc-tab" role="tab" aria-selected="false" aria-pressed="false" data-doc="statement">Neighbor statement</button>
+            </div>
+            <div class="evidence-view" id="evidence-view" role="tabpanel" tabindex="0"></div>
+            <div class="choices-label"><span>Disposition</span><span>Choose what the next office will receive</span></div>
+            <div class="choices">
+              <button class="choice" data-choice="correct"><span class="choice-key">1</span><span>Correct the register</span><small>Use the recent evidence</small></button>
+              <button class="choice" data-choice="uphold"><span class="choice-key">2</span><span>Uphold the official record</span><small>Keep the archived status</small></button>
+              <button class="choice" data-choice="both"><span class="choice-key">3</span><span>Attach both accounts</span><small>Keep the discrepancy open</small></button>
+            </div>
+          </section>
+
+          <section class="stage" id="stage-outcome">
+            <p class="eyebrow" id="outcome-eyebrow">Decision entered</p>
+            <h2 id="outcome-title"></h2>
+            <div class="stamp" id="outcome-stamp"></div>
+            <div class="outcome-copy" id="outcome-copy"></div>
+            <div class="file-total">The office has received your decision</div>
+            <p class="final-note" id="outcome-residue"></p>
+            <button class="primary" id="outcome-next" data-action="next">Close the file <span aria-hidden="true">&nbsp;→</span></button>
+          </section>
+
+          <section class="stage" id="stage-final">
+            <p class="eyebrow">End of the second workday</p>
+            <h2>The file is consistent.</h2>
+            <div class="final-card" id="final-card"></div>
+            <p class="final-note">Mr. Klein remembers the first decision. The filing system records only the latest copy.</p>
+            <div class="quote">The guard holds the door. “See you tomorrow, Mr. Klein.”</div>
+            <p class="lead" style="font-size:15px">The form is filed. The discrepancy is not.</p>
+            <button class="restart" data-action="restart">Begin the same morning again</button>
+          </section>
+        </div>
+        <div class="statusline"><span id="status-left">File 18/4 · Awaiting clerk</span><span id="status-right">No further instructions</span></div>
+        <button class="hidden-entry" id="hidden-entry" aria-label="Read the small yellow note"></button>
+        <div class="tooltip" id="tooltip" role="status" hidden>You cannot tell whether it was there before you noticed it.</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var stageNames = ["welcome", "morning", "case", "outcome", "final"];
+      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, viewed: {}, activeDoc: "registry", markSeen: false };
+      var labels = { correct: "CORRECTION ENTERED", uphold: "NO AMENDMENT", both: "ANNEX ATTACHED" };
+      var docs = {
+        registry: { title: "Registry extract · Form 12", day1: "Emil Voss — deceased. Entry accepted fourteen years ago. The field for household members is blank.", day2: "Emil Voss — deceased. Entry accepted fourteen years ago. A pencil note in the margin reads: “Second copy requested.”" },
+        receipt: { title: "Rent receipt · last month", day1: "Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. The archive has no matching sample.", day2: "Paid in full by M. Voss and E. Voss. The second signature is written in blue ink. It is dated tomorrow." },
+        statement: { title: "Neighbor statement · Building 18", day1: "“No one called Emil has ever lived at number 18. I have been here since before the new records began.” — A. Novak", day2: "“I do not know why you keep asking me about Emil. I have never met Mr. Klein.” — A. Novak" }
+      };
+
+      var el = function (id) { return document.getElementById(id); };
+      var esc = function (value) {
+        return String(value).replace(/[&<>"']/g, function (char) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+        });
+      };
+      function setStage(name) {
+        state.stage = name;
+        stageNames.forEach(function (stage) {
+          el("stage-" + stage).classList.toggle("active", stage === name);
+        });
+        document.querySelector(".page-content").scrollTop = 0;
+        updateStatus();
+      }
+      function updateStatus() {
+        var dayName = state.day === 1 ? "Monday" : "Tuesday";
+        el("loop-label").textContent = state.day === 1 ? "First morning" : "Second morning";
+        el("workday").textContent = state.stage === "welcome" ? "Before opening" : dayName + " · 08:14";
+        el("day-foot").textContent = dayName + " · 08:14";
+        el("clock").textContent = "08:14";
+        el("clock").setAttribute("aria-label", "8:14");
+        if (state.stage === "welcome") {
+          el("status-left").textContent = "File 18/4 · Awaiting clerk";
+          el("status-right").textContent = "No further instructions";
+        } else if (state.stage === "final") {
+          el("status-left").textContent = "File 18/4 · Marked consistent";
+          el("status-right").textContent = "No further instructions";
+        } else {
+          el("status-left").textContent = "File 18/4 · " + (state.day === 1 ? "First copy" : "Second copy");
+          el("status-right").textContent = state.stage === "case" ? "Disposition required" : "No further instructions";
+        }
+      }
+      function showMorning() {
+        var first = state.day === 1;
+        el("morning-eyebrow").textContent = (first ? "Monday" : "Tuesday") + " · 08:14";
+        el("morning-title").textContent = first ? "The same desk." : "The desk has not moved.";
+        el("morning-description").textContent = first
+          ? "The clock is already running. A file waits where the blotter ends."
+          : "The case number is familiar. The date on the cover says it arrived this morning.";
+        el("guard-line").textContent = first
+          ? "“Morning, Mr. Klein. Your desk is exactly where you left it.”"
+          : "“Morning, Mr. Klein. Did I give you this file yesterday?” The guard has already forgotten asking.";
+        el("morning-residue").textContent = first
+          ? "A tray marked INCOMING is empty. The paper-feed in the next office keeps moving."
+          : "A small yellow mark has appeared on the glass. The rain runs around it.";
+        el("room-note").textContent = first
+          ? "The room is quiet except for the clock and the paper feed in the next office."
+          : "The paper feed continues. The clock has returned to 08:14.";
+        el("case-eyebrow").textContent = (first ? "Monday" : "Tuesday") + " · Case 18/4";
+        el("case-description").textContent = first
+          ? "Marta Voss asks to restore her husband Emil to the household register. The archive has recorded him as deceased for fourteen years."
+          : "Marta Voss has returned for a copy. The system has opened a new request under the same case number; it cannot find yesterday’s decision.";
+        el("applicant-statement").textContent = first
+          ? "“My husband is not dead. The register says he is. I need his name on the household record.”"
+          : "“You said the file was complete. Why did the post return his letter?”";
+        el("applicant-followup").textContent = first
+          ? "She keeps one hand on the envelope. The other rests on the chair beside her."
+          : "She places the same envelope on the desk. The date on its postmark is tomorrow.";
+        el("case-status").textContent = first ? "Pending" : "New request";
+        state.viewed = {};
+        state.activeDoc = "registry";
+        renderEvidence();
+        setStage("morning");
+      }
+      function renderEvidence() {
+        var doc = docs[state.activeDoc];
+        var text = state.day === 1 ? doc.day1 : doc.day2;
+        state.viewed[state.activeDoc] = true;
+        document.querySelectorAll(".doc-tab").forEach(function (tab) {
+          var active = tab.getAttribute("data-doc") === state.activeDoc;
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+          tab.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        el("evidence-view").innerHTML = '<div class="evidence-index">' + esc(doc.title) + '</div><p>' + esc(text) + '</p>';
+        var count = Object.keys(state.viewed).length;
+        el("evidence-count").textContent = count ? "· " + count + " of 3 opened" : "";
+      }
+      function outcomeFor(choice, day) {
+        if (day === 1) {
+          if (choice === "correct") {
+            return {
+              title: "A name is restored.",
+              copy: "Marta reads the new entry twice. “There. Now the post will know where to go.” She takes the copy but leaves the envelope.",
+              residue: "The original death entry remains in the archive. The new household register lists two residents.",
+              stamp: "CORRECTED"
+            };
+          }
+          if (choice === "uphold") {
+            return {
+              title: "The record stays closed.",
+              copy: "Marta accepts the refusal. “Then I will bring the letter again.” She leaves the envelope on your desk.",
+              residue: "The refusal form has a box for the applicant’s signature. It is already signed.",
+              stamp: "NO AMENDMENT"
+            };
+          }
+          return {
+            title: "Both accounts are kept.",
+            copy: "You attach the receipt to the death entry. The stamp reads DUPLICATE ORIGINAL. The file is accepted by the next tray.",
+            residue: "The receipt and the death entry now carry the same file number.",
+            stamp: "ANNEX ATTACHED"
+          };
+        }
+        if (choice === "correct") {
+          return {
+            title: "The second copy is issued.",
+            copy: "Marta says the envelope has already been delivered. She takes the copy anyway. The address line is blank.",
+            residue: "The office prints a fresh household record with two names. The archive count remains one.",
+            stamp: "CORRECTED AGAIN"
+          };
+        }
+        if (choice === "uphold") {
+          return {
+            title: "The second request is refused.",
+            copy: "Marta says, “I understand.” She leaves with the envelope addressed to Emil. The guard asks who it was for.",
+            residue: "The case is marked complete. No applicant is listed on the outgoing copy.",
+            stamp: "REFUSAL REPEATED"
+          };
+        }
+        return {
+          title: "The annex is accepted again.",
+          copy: "The clerk checks the pages. One is marked ORIGINAL; the other is also marked ORIGINAL. Both are sent onward.",
+          residue: "The routing slip says: CONSISTENT. The two statements remain attached.",
+          stamp: "DUPLICATE ORIGINAL"
+        };
+      }
+      function choose(choice) {
+        state.currentChoice = choice;
+        if (state.day === 1) state.firstChoice = choice;
+        var outcome = outcomeFor(choice, state.day);
+        el("outcome-eyebrow").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Decision entered";
+        el("outcome-title").textContent = outcome.title;
+        el("outcome-stamp").textContent = outcome.stamp;
+        el("outcome-copy").innerHTML = "<p>" + esc(outcome.copy) + "</p>";
+        el("outcome-residue").textContent = outcome.residue;
+        el("outcome-next").innerHTML = state.day === 1 ? "Close the file <span aria-hidden=\"true\">&nbsp;→</span>" : "File the second copy <span aria-hidden=\"true\">&nbsp;→</span>";
+        setStage("outcome");
+      }
+      function closeDay() {
+        if (state.day === 1) {
+          state.day = 2;
+          showMorning();
+        } else {
+          var same = state.firstChoice === state.currentChoice;
+          var firstLabel = labels[state.firstChoice].toLowerCase();
+          var secondLabel = labels[state.currentChoice].toLowerCase();
+          var conclusion = same
+            ? "The first and second copies agree: " + firstLabel + ". The case is marked consistent. The names on the copies are not written in the same hand."
+            : "The first copy records " + firstLabel + ". The second records " + secondLabel + ". The routing slip says: “Resolved — no further action.”";
+          el("final-card").innerHTML = '<div class="paper-label">Routing slip · final copy</div><p>' + esc(conclusion) + '</p>';
+          setStage("final");
+          el("room-note").textContent = "The office closes. The paper feed in the next room continues.";
+        }
+      }
+      function reset() {
+        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, viewed: {}, activeDoc: "registry", markSeen: false };
+        el("tooltip").hidden = true;
+        el("room-note").textContent = "The room is quiet except for the clock and the paper feed in the next office.";
+        setStage("welcome");
+      }
+      document.addEventListener("click", function (event) {
+        var action = event.target.closest("[data-action]");
+        var tab = event.target.closest("[data-doc]");
+        var choice = event.target.closest("[data-choice]");
+        if (action) {
+          var name = action.getAttribute("data-action");
+          if (name === "begin") showMorning();
+          if (name === "open-file") setStage("case");
+          if (name === "next") closeDay();
+          if (name === "restart") reset();
+          return;
+        }
+        if (tab) {
+          state.activeDoc = tab.getAttribute("data-doc");
+          renderEvidence();
+          return;
+        }
+        if (choice) {
+          choose(choice.getAttribute("data-choice"));
+          return;
+        }
+      });
+      el("yellow-mark").addEventListener("click", function () {
+        state.markSeen = true;
+        el("tooltip").hidden = false;
+      });
+      el("hidden-entry").addEventListener("click", function () {
+        el("tooltip").hidden = false;
+      });
+      updateStatus();
+    }());
+  </script>
+</body>
+</html>
