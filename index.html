@@ -441,8 +441,8 @@
     }
     @media (max-width: 520px) {
       body { padding: 9px; }
-      .topbar { font-size: 8px; letter-spacing: .08em; }
-      .top-status { gap: 9px; }
+      .topbar { flex-wrap:wrap; font-size: 8px; letter-spacing: .08em; }
+      .top-status { width:100%; justify-content:space-between; gap: 9px; }
       .top-status .loop-text { display: none; }
       .sound-toggle { padding:3px 5px; font-size:9px; }
       .frame { margin-top: 11px; }
@@ -672,6 +672,9 @@
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
         });
       };
+      function addressIsValid() {
+        return state.address.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase() === "dlouha 18";
+      }
       function setStage(name) {
         state.stage = name;
         stageNames.forEach(function (stage) {
@@ -689,12 +692,12 @@
         var tasks = state.day === 1
           ? [
             ["Compare the registry and rent receipt", !!(state.viewed.registry && state.viewed.receipt)],
-            ["Enter the household address on the copy", !!state.address.trim() || !!state.signedDays[1]],
+            ["Enter the household address on the copy", addressIsValid() || !!state.signedDays[1]],
             ["Sign and send the clerk’s copy", !!state.signedDays[1]]
           ]
           : [
             ["Read the returned copy", state.returnedRead],
-            ["Enter the address on the second copy", !!state.address.trim() || !!state.signedDays[2]],
+            ["Enter the address on the second copy", addressIsValid() || !!state.signedDays[2]],
             ["Sign and route the second copy", !!state.signedDays[2]]
           ];
         el("docket-title").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Today’s docket · " + tasks.filter(function (task) { return task[1]; }).length + "/3";
@@ -939,8 +942,8 @@
         var address = state.address.trim();
         var signed = state.signatureDrawn || state.signatureTyped;
         var button = el("form-actions").querySelector('[data-step="sign"]');
-        if (button) button.disabled = !address || !signed;
-        el("action-feedback").textContent = !address ? "Copy the street and number from the request." : !signed ? "Sign on the line with a finger or mouse, or use the typed signature." : "The copy is ready for the outgoing tray.";
+        if (button) button.disabled = !addressIsValid() || !signed;
+        el("action-feedback").textContent = !address ? "Copy the street and number from the request." : !addressIsValid() ? "Compare the street line with the request." : !signed ? "Sign on the line with a finger or mouse, or use the typed signature." : "The copy is ready for the outgoing tray.";
         renderDocket();
       }
       function clearSignature() {
@@ -1062,7 +1065,7 @@
           syncFormReadiness();
           return;
         }
-        if (step === "sign" && (!state.address.trim() || !(state.signatureDrawn || state.signatureTyped))) return;
+        if (step === "sign" && (!addressIsValid() || !(state.signatureDrawn || state.signatureTyped))) return;
         document.querySelectorAll(".form-action").forEach(function (button) { button.disabled = true; });
         form.classList.add("is-working");
         if (step === "erase") {
@@ -1208,6 +1211,7 @@
       var signatureContext = signatureCanvas.getContext("2d");
       var signing = false;
       var strokeLength = 0;
+      var lastSignaturePoint = null;
       function signaturePoint(event) {
         var rect = signatureCanvas.getBoundingClientRect();
         return { x: (event.clientX - rect.left) * signatureCanvas.width / rect.width, y: (event.clientY - rect.top) * signatureCanvas.height / rect.height };
@@ -1220,6 +1224,7 @@
         var point = signaturePoint(event);
         signatureContext.beginPath();
         signatureContext.moveTo(point.x, point.y);
+        lastSignaturePoint = point;
         signatureContext.lineWidth = 2.8;
         signatureContext.lineCap = "round";
         signatureContext.lineJoin = "round";
@@ -1229,17 +1234,16 @@
       signatureCanvas.addEventListener("pointermove", function (event) {
         if (!signing) return;
         var point = signaturePoint(event);
-        var last = signatureContext._lastPoint || point;
-        strokeLength += Math.hypot(point.x - last.x, point.y - last.y);
+        strokeLength += Math.hypot(point.x - lastSignaturePoint.x, point.y - lastSignaturePoint.y);
         signatureContext.lineTo(point.x, point.y);
         signatureContext.stroke();
-        signatureContext._lastPoint = point;
+        lastSignaturePoint = point;
         penTick();
       });
       function endSignature() {
         if (!signing) return;
         signing = false;
-        signatureContext._lastPoint = null;
+        lastSignaturePoint = null;
         if (strokeLength > 12) {
           state.signatureDrawn = true;
           state.signatureTyped = false;
