@@ -8,7 +8,9 @@ Open index.html in a modern browser. No build step, account, or external assets 
 
 1. Begin the workday.
 2. Open the file and inspect the registry extract, rent receipt, and neighbor statement.
-3. Choose whether to correct the register, uphold the archived record, or attach both accounts.
+3. Choose whether to correct the register, uphold the archived record, or attach both accounts. Each choice now opens a form action: strike through and rewrite the status, copy the official entry, or fasten the receipt to the file.
 4. Continue into the next morning and make the decision again with the consequences in view.
+
+You can set the form aside before signing. Signing stamps the copy and sends it to the next office. Pen, punch, and stamp sounds accompany the actions; supported phones also give a brief haptic response.
 
 The demo has no score or correct answer. It is a prototype of the game's routine, contradictions, and unresolved residue.
