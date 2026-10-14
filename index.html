@@ -362,6 +362,17 @@
     .return-slip p { margin:0; color:#354138; font-size:15px; }
     .return-mark { margin-top:8px; color:#865a4d; font:10px "Courier New",monospace; letter-spacing:.1em; text-transform:uppercase; }
     .return-memo { margin-top:11px; padding-top:7px; border-top:1px solid #c9bea9; color:#727265; font:10px/1.5 "Courier New",monospace; letter-spacing:.02em; }
+    .side-files { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin:14px 0 17px; }
+    .side-files:empty { display:none; }
+    .mini-file { min-width:0; padding:10px 11px; border:1px solid #c8beab; background:rgba(222,215,199,.52); box-shadow:2px 3px 0 rgba(73,72,61,.06); transition:opacity .25s,transform .25s; }
+    .mini-file.filed { opacity:.68; transform:translateY(2px); }
+    .mini-head { display:flex; justify-content:space-between; gap:5px; color:#687066; font:9px "Courier New",monospace; letter-spacing:.06em; text-transform:uppercase; }
+    .mini-file p { margin:7px 0; color:#525a51; font-size:12px; line-height:1.4; }
+    .mini-file .mini-address { color:#35483b; font:11px/1.4 "Courier New",monospace; overflow-wrap:anywhere; }
+    .mini-file button { min-height:26px; padding:3px 7px; border:1px solid #a9a795; background:transparent; color:#495449; cursor:pointer; font:9px "Courier New",monospace; letter-spacing:.03em; }
+    .mini-file button:hover, .mini-file button:focus-visible { background:#dfd8c7; outline:1px solid var(--gold); }
+    .mini-file button:disabled { cursor:default; color:#596b5b; border-color:#7d897c; }
+    .mini-file .mini-stamp { float:right; padding:2px 4px; border:1px solid #89564a; color:#89564a; font:bold 9px "Courier New",monospace; letter-spacing:.08em; transform:rotate(-5deg); }
     .crossed { text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:#975f54; color:#756c63; }
     .inked { color:#344e3e; font-style:italic; }
     .original-mark { display:inline-block; margin:4px 7px 0 0; padding:3px 5px; border:1px solid #9b6e60; color:#895849; font:10px "Courier New",monospace; transform:rotate(-3deg); }
@@ -438,6 +449,7 @@
       .room:after { height: 27%; }
       .desk { padding: 24px clamp(20px, 5vw, 42px) 30px; }
       .page-content { min-height: 470px; }
+      .side-files { grid-template-columns:1fr; }
     }
     @media (max-width: 520px) {
       body { padding: 9px; }
@@ -490,9 +502,9 @@
           <section class="stage active" id="stage-welcome">
             <p class="eyebrow">A short interactive narrative</p>
             <h1>See You Tomorrow,<br>Mr. Klein</h1>
-            <p class="lead">A routine correction. Two records that cannot both be right. The office is waiting for a version it can file.</p>
+            <p class="lead">A morning’s stack of files. One small discrepancy will follow the other papers into tomorrow.</p>
             <div class="quote">“The form is complete, Mr. Klein. It only needs to be made consistent.”</div>
-            <div class="small-meta">One case · Two mornings · No complete explanation</div>
+            <div class="small-meta">Two mornings · Incoming and outgoing · No complete explanation</div>
             <button class="primary" data-action="begin">Begin the workday <span aria-hidden="true">&nbsp;→</span></button>
           </section>
 
@@ -503,6 +515,7 @@
             <div class="quote" id="guard-line"></div>
             <div class="return-slip" id="return-slip" hidden aria-label="Returned document"><div class="return-head"><span>Incoming · File 18/4</span><span>Second copy</span></div><p id="return-text"></p><div class="return-mark" id="return-mark"></div><div class="return-memo" id="return-memo"></div></div>
             <p id="morning-residue" class="final-note"></p>
+            <div class="side-files" id="mini-files" aria-label="Other files for today"></div>
             <button class="primary" data-action="open-file">Open the file <span aria-hidden="true">&nbsp;→</span></button>
           </section>
 
@@ -591,7 +604,7 @@
     (function () {
       "use strict";
       var stageNames = ["welcome", "morning", "case", "action", "outcome", "final"];
-      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, markSeen: false, transitioning: false };
+      var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, miniFiled: { 1: {}, 2: {} }, markSeen: false, transitioning: false };
       var audioEngine = null;
       var soundEnabled = true;
       var musicPulse = 0;
@@ -665,6 +678,16 @@
           }
         }
       };
+      var miniCases = {
+        1: [
+          { id: "counter", ref: "Form 8/2", title: "Resident index · corrected copy", address: "Vodičkova 681/18, 115 68 Praha 1", note: "The old street spelling remains on the carbon.", action: "Route the corrected copy" },
+          { id: "reading-room", ref: "Receipt 14/6", title: "Duplicate receipt", address: "Mariánské nám. 190/5, 110 00 Praha 1", note: "Both copies are marked ORIGINAL. The receiving line has one field.", action: "Forward both copies" }
+        ],
+        2: [
+          { id: "old-town", ref: "Notice 19/8", title: "Unclaimed notice", address: "Staroměstské náměstí 1/3, 110 00 Praha 1", note: "No signature appears in the recipient box. The mark beneath it is dry.", action: "Route as unclaimed" },
+          { id: "household-return", ref: "Return 4/18", title: "Address returned", address: "Dlouhá 18, 110 00 Praha 1", note: "The post has not marked the building. It has marked the name.", action: "Send back to the registry" }
+        ]
+      };
 
       var el = function (id) { return document.getElementById(id); };
       var esc = function (value) {
@@ -691,17 +714,44 @@
         if (docket.hidden) return;
         var tasks = state.day === 1
           ? [
+            ["Route the corrected resident index", !!state.miniFiled[1].counter],
+            ["Forward the duplicate receipt", !!state.miniFiled[1]["reading-room"]],
             ["Compare the registry and rent receipt", !!(state.viewed.registry && state.viewed.receipt)],
             ["Enter the household address on the copy", addressIsValid() || !!state.signedDays[1]],
             ["Sign and send the clerk’s copy", !!state.signedDays[1]]
           ]
           : [
+            ["Route the unclaimed notice", !!state.miniFiled[2]["old-town"]],
+            ["Return the address slip to the registry", !!state.miniFiled[2]["household-return"]],
             ["Read the returned copy", state.returnedRead],
             ["Enter the address on the second copy", addressIsValid() || !!state.signedDays[2]],
             ["Sign and route the second copy", !!state.signedDays[2]]
           ];
-        el("docket-title").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Today’s docket · " + tasks.filter(function (task) { return task[1]; }).length + "/3";
+        el("docket-title").textContent = (state.day === 1 ? "Monday" : "Tuesday") + " · Today’s docket · " + tasks.filter(function (task) { return task[1]; }).length + "/5";
         el("docket-list").innerHTML = tasks.map(function (task) { return '<li class="' + (task[1] ? "done" : "") + '">' + esc(task[0]) + "</li>"; }).join("");
+      }
+      function renderMiniFiles() {
+        var files = miniCases[state.day];
+        el("mini-files").innerHTML = files.map(function (file) {
+          var done = !!state.miniFiled[state.day][file.id];
+          return '<article class="mini-file' + (done ? ' filed' : '') + '" data-mini-card="' + esc(file.id) + '"><div class="mini-head"><span>' + esc(file.ref) + '</span><span>' + esc(file.title) + '</span></div><p class="mini-address">' + esc(file.address) + '</p><p>' + esc(file.note) + '</p><button type="button" data-mini-file="' + esc(file.id) + '" ' + (done ? 'disabled' : '') + '>' + (done ? 'Filed · RECEIVED' : esc(file.action)) + '</button>' + (done ? '<span class="mini-stamp" aria-label="Received">RECEIVED</span>' : '') + '</article>';
+        }).join("");
+      }
+      function fileMiniCase(id) {
+        var card = el("mini-files").querySelector('[data-mini-card="' + id + '"]');
+        if (!card || state.miniFiled[state.day][id]) return;
+        state.miniFiled[state.day][id] = true;
+        card.classList.add("filed");
+        var button = card.querySelector("button");
+        button.disabled = true;
+        button.textContent = "Filed · RECEIVED";
+        var stamp = document.createElement("span");
+        stamp.className = "mini-stamp";
+        stamp.setAttribute("aria-label", "Received");
+        stamp.textContent = "RECEIVED";
+        card.appendChild(stamp);
+        feelAction("stamp");
+        renderDocket();
       }
       function updateStatus() {
         var dayName = state.day === 1 ? "Monday" : "Tuesday";
@@ -744,6 +794,7 @@
           el("return-mark").textContent = returned.returnMark;
           el("return-memo").textContent = returned.memo;
         }
+        renderMiniFiles();
         el("case-eyebrow").textContent = (first ? "Monday" : "Tuesday") + " · Case 18/4";
         el("case-title").textContent = first ? "A name returned to the register" : returned.caseTitle;
         el("case-description").textContent = first
@@ -1170,7 +1221,7 @@
         }, reduced ? 420 : 780);
       }
       function reset() {
-        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, markSeen: false, transitioning: false };
+        state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, actionFeedback: "", viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, miniFiled: { 1: {}, 2: {} }, markSeen: false, transitioning: false };
         el("paper-transition").hidden = true;
         el("tooltip").hidden = true;
         el("room-note").textContent = "The room is quiet except for the clock and the paper feed in the next office.";
@@ -1180,6 +1231,7 @@
         var action = event.target.closest("[data-action]");
         var tab = event.target.closest("[data-doc]");
         var choice = event.target.closest("[data-choice]");
+        var miniFile = event.target.closest("[data-mini-file]");
         var formAction = event.target.closest("[data-step]");
         if (action) {
           var name = action.getAttribute("data-action");
@@ -1198,6 +1250,7 @@
           choose(choice.getAttribute("data-choice"));
           return;
         }
+        if (miniFile) { fileMiniCase(miniFile.getAttribute("data-mini-file")); return; }
         if (formAction) {
           performAction(formAction.getAttribute("data-step"));
           return;
