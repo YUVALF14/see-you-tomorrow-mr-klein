@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 24488)
+Total output lines: 1517
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -655,6 +658,17 @@
       var state = { stage: "welcome", day: 1, firstChoice: null, currentChoice: null, pendingChoice: null, actionStep: 0, viewed: {}, activeDoc: "registry", address: "", signatureDrawn: false, signatureTyped: false, returnedRead: false, signedDays: {}, workLog: {}, markSeen: false, transitioning: false };
       var audioEngine = null;
       var soundEnabled = true;
+      var recordedAudio = {};
+      var recordedAudioPaths = {
+        rain: "assets/audio/room/rain_window.mp3",
+        clock: "assets/audio/room/clock_tick_tock.mp3",
+        drip: "assets/audio/room/ceiling_drip.mp3",
+        footsteps: "assets/audio/room/hallway_steps.mp3",
+        music: "assets/audio/music/recorded_piano.mp3",
+        pen: "assets/audio/foley/pen_on_paper.mp3",
+        paper: "assets/audio/foley/paper_movement.mp3",
+        stamp: "assets/audio/foley/rubber_stamp.mp3"
+      };
       var rainVolume = .7;
       var lastPenSound = 0;
       var labels = { correct: "CORRECTION ENTERED", uphold: "NO AMENDMENT", both: "ANNEX ATTACHED" };
@@ -689,29 +703,7 @@
           morningDescription: "A letter sits above your signed refusal. It was not entered in the office’s outgoing mail.",
           guard: "“The lift is stuck again,” the guard says. “The postman left these by my desk.”",
           residue: "Marta’s name appears in the refusal’s signature field. The carbon beneath it is smooth.",
-          room: "A returned envelope rests against the incoming tray.",
-          caseTitle: "A letter with no addressee",
-          caseDescription: "Marta needs the letter delivered to Emil before the housing office will renew their tenancy. The post has returned it under the archived status.",
-          statement: "“If he cannot receive a letter here, they will take his name off the lease.”",
-          followup: "She holds the unopened envelope by its corners. It has no return address.",
-          status: "Returned · undeliverable",
-          returnHtml: "To: Emil Voss<br>Dlouhá 18, 110 00 Praha 1",
-          returnMark: "Returned by post · addressee deceased",
-          memo: "Applicant kept a second chair available. No additional resident is recorded.",
-          docs: {
-            registry: { title: "Registry extract · refusal copy", html: "Emil Voss — deceased. No amendment entered. The applicant signature field bears Marta’s name; the carbon sheet beneath it has no impression." },
-            receipt: { title: "Rent receipt · last month", html: "Dlouhá 18, 110 00 Praha 1. Paid in full by M. Voss and E. Voss. The second signature remains in blue ink." },
-            statement: { title: "Neighbor statement · Dlouhá 18", html: "“No one called Emil has ever lived at number 18.” — A. Novak. The housing office has requested a copy." }
-          }
-        },
-        both: {
-          morningTitle: "Two originals in the tray.",
-          morningDescription: "The annex has returned attached to the registry extract. Both pages are stamped ORIGINAL. The routing slip says CONSISTENT.",
-          guard: "“The lift is stuck again,” the guard says. “I left your tray as I found it.”",
-          residue: "The staple has been bent twice but has never been removed.",
-          room: "Two pages settle together in the incoming tray.",
-          caseTitle: "Which original goes home?",
-          caseDescription: "Marta needs proof of payment for her landlord. The office will release one original but cannot distinguish the two attached pages.",
+          room: "A returned envelope rest…488 tokens truncated…t for her landlord. The office will release one original but cannot distinguish the two attached pages.",
           statement: "“They said I could collect the original. Which of these can I take?”",
           followup: "Her hand stops at the staple. Pulling either sheet free would tear the other.",
           status: "Returned · duplicate original",
@@ -982,22 +974,68 @@
           rainSource.buffer = noise; rainSource.loop = true;
           rainFilter.type = "lowpass"; rainFilter.frequency.value = 1900;
           rainSource.connect(rainFilter); rainFilter.connect(rain); rainSource.start();
-          audioEngine = { ctx: ctx, master: master, music: music, effects: effects, rain: rain, clockPhase: 0, dripTimer: null };
+          audioEngine = { ctx: ctx, master: master, music: music, effects: effects, rain: rain, clockPhase: 0, dripTimer: null, footstepsTimer: null };
+          prepareRecordedAudio();
           setSoundMood(state.stage);
           audioEngine.clockTimer = window.setInterval(playClockTick, 500);
           scheduleCeilingDrip();
+          scheduleHallwayStep();
           return audioEngine;
         } catch (e) { return null; }
       }
       function setSoundMood(stage) {
         if (!audioEngine) return;
         var ctx = audioEngine.ctx;
-        // Keep score silent until a licensed, recorded performance is installed.
+        // The score bus stays silent; only an imported, recorded performance may provide music.
         audioEngine.music.gain.setTargetAtTime(0, ctx.currentTime, .45);
-        audioEngine.rain.gain.setTargetAtTime(stage === "welcome" ? 0 : .15 * rainVolume, ctx.currentTime, .5);
+        var realRain = recordedAudio.rain && recordedAudio.rain.readyState >= 2;
+        audioEngine.rain.gain.setTargetAtTime(stage === "welcome" || realRain ? 0 : .15 * rainVolume, ctx.currentTime, .5);
+        setRecordedVolumes(stage);
+      }
+      function prepareRecordedAudio() {
+        Object.keys(recordedAudioPaths).forEach(function (name) {
+          if (recordedAudio[name]) return;
+          var media = new Audio();
+          media.preload = "auto";
+          media.src = recordedAudioPaths[name];
+          media.loop = name === "rain" || name === "clock" || name === "music";
+          media.volume = name === "rain" ? .15 * rainVolume : name === "music" ? .055 : .45;
+          media.muted = !soundEnabled || document.hidden;
+          media.addEventListener("canplaythrough", function () {
+            if (!soundEnabled || document.hidden || state.stage === "welcome") return;
+            if (name === "rain" || name === "clock" || name === "music") media.play().catch(function () {});
+            if (name === "rain" && audioEngine) setSoundMood(state.stage);
+          });
+          media.addEventListener("error", function () { media.dataset.unavailable = "true"; });
+          recordedAudio[name] = media;
+          media.load();
+        });
+      }
+      function setRecordedVolumes(stage) {
+        Object.keys(recordedAudio).forEach(function (name) {
+          var media = recordedAudio[name];
+          media.muted = !soundEnabled || document.hidden || stage === "welcome";
+          if (name === "rain") media.volume = .15 * rainVolume;
+          if (name === "music") media.volume = { morning: .055, case: .06, action: .035, outcome: .045, final: .04, transition: .065 }[stage] || 0;
+          if ((name === "rain" || name === "clock" || name === "music") && soundEnabled && !document.hidden && stage !== "welcome" && media.readyState >= 2 && media.paused) media.play().catch(function () {});
+        });
+      }
+      function playRecordedOneShot(name, volume) {
+        var media = recordedAudio[name];
+        if (!media || media.dataset.unavailable === "true" || media.readyState < 2 || !soundEnabled || document.hidden) return false;
+        media.loop = false;
+        media.volume = volume === undefined ? .42 : volume;
+        media.muted = false;
+        try { media.currentTime = 0; } catch (e) {}
+        media.play().catch(function () {});
+        return true;
       }
       function playClockTick() {
         if (!audioEngine || !soundEnabled || state.stage === "welcome" || document.hidden) return;
+        if (recordedAudio.clock && recordedAudio.clock.readyState >= 2) {
+          if (recordedAudio.clock.paused) { recordedAudio.clock.volume = .12; recordedAudio.clock.loop = true; recordedAudio.clock.play().catch(function () {}); }
+          return;
+        }
         var ctx = audioEngine.ctx;
         var now = ctx.currentTime;
         var tock = audioEngine.clockPhase++ % 2 === 1;
@@ -1023,6 +1061,7 @@
       }
       function playCeilingDrip() {
         if (!audioEngine || !soundEnabled || state.stage === "welcome" || document.hidden) return;
+        if (playRecordedOneShot("drip", .32)) return;
         var ctx = audioEngine.ctx;
         var now = ctx.currentTime;
         var osc = ctx.createOscillator();
@@ -1049,9 +1088,19 @@
           echo.start(now + .22); echo.stop(now + .35);
         }
       }
+      function scheduleHallwayStep() {
+        if (!audioEngine) return;
+        window.clearTimeout(audioEngine.footstepsTimer);
+        audioEngine.footstepsTimer = window.setTimeout(function () {
+          if (state.stage !== "welcome" && !document.hidden) playRecordedOneShot("footsteps", .28);
+          scheduleHallwayStep();
+        }, 28000 + Math.random() * 52000);
+      }
       function playActionSound(kind) {
         var engine = ensureAudio();
         if (!engine) return;
+        var recordedName = kind === "stamp" ? "stamp" : kind === "attach" || kind === "slide" ? "paper" : kind === "write" || kind === "scratch" ? "pen" : "";
+        if (recordedName && playRecordedOneShot(recordedName, kind === "stamp" ? .62 : .42)) return;
         var ctx = engine.ctx;
         var now = ctx.currentTime;
         if (kind === "stamp" || kind === "attach") {
@@ -1435,10 +1484,12 @@
         if (audioEngine) {
           audioEngine.master.gain.setTargetAtTime(soundEnabled ? 1 : 0, audioEngine.ctx.currentTime, .04);
           if (soundEnabled) { setSoundMood(state.stage); }
+          else setRecordedVolumes("welcome");
         }
       });
       document.addEventListener("visibilitychange", function () {
         if (audioEngine) audioEngine.master.gain.setTargetAtTime(soundEnabled && !document.hidden ? 1 : 0, audioEngine.ctx.currentTime, .07);
+        setRecordedVolumes(document.hidden ? "welcome" : state.stage);
       });
       updateStatus();
     }());
